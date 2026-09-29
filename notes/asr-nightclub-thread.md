@@ -23,7 +23,7 @@ Forum opinion, paraphrased via an automated page summarizer - treat numbers as l
 
 ## What it suggests for this system (unverified until measured)
 - **Target curve for roadmap step 4**: broad lift centred ~40-80 Hz, strong 50-200 Hz, flat-ish mids, gentle attention at ~2.5-4 kHz on the 812 horns. Don't chase extension below ~35 Hz - it costs sub headroom and masks slam.
-- **Headroom is our likely limit**: F1 subs (2x10") and the QSC KSub (2x12") are small by club standards. Prefer cuts over boosts (again: replace AutoEQ1's +6 dB narrow boosts), and consider a subsonic high-pass near ~30 Hz on sub feeds to save excursion - check what the KSub already does internally first.
+- **Headroom is our likely limit**: the F1 subs (2x10") are small by club standards. The sub is a QSC KS212C (corrected 2026-09-29 - earlier notes said KSub): dual 12" cardioid bandpass, 132 dB peak, so it's more capable than the thread's "double 12s are not enough" comment implies, but still one box. Prefer cuts over boosts (again: replace AutoEQ1's +6 dB narrow boosts), and consider a subsonic high-pass near ~30 Hz on sub feeds to save excursion - check what the KSub already does internally first.
 - **Mono A/B test**: cheap to try on the DriveRack (sum mains), compare by ear on the floor.
 - **Measure at party level** as well as quiet, and remember the empty room will read livelier than with people in it.
 - **Sub/top time alignment** (QSC vs F1 subs, roadmap step 4) is exactly the "alignment" the thread keeps crediting.

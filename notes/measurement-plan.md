@@ -17,30 +17,42 @@ DJM must be a fixed, known, flat stage for every measurement:
 - Channel EQ at 0 (centre detents), Sound Color FX off, crossfader not cutting that channel, channel fader and master at marked positions, trim noted.
 - Photo of the mixer settings goes in `measurements/<session>/`.
 
-## The crossover question: DriveRack or KSub?
-Recommendation: **DriveRack** - agreeing with Tony - with one condition.
-- Why: one place for the whole sub decision (frequency, slope, delay, polarity), saved in the preset, readable and scriptable, and its phase is known so the alignment math is honest. The KSub's internal filter is a fixed, unknown slope.
-- Condition: **only one low-pass in the path.** If the KSub's own crossover can be switched to bypass/thru, do that and set `Sub_LPFrequency` on the DriveRack. If it can't, leave the DriveRack low-pass Out (as now) - stacking two filters just makes an unknown steeper one.
-- Needed from Tony: what the KSub's rear panel crossover options are (and exact model).
-- Bigger picture: the F1 subs get full range and split to the 812s with their own fixed internal crossover, so the KSub isn't really "crossing to tops" - it **overlaps** the F1 subs. The real choice is:
-  - (a) KSub and F1 subs share the same bass band (more headroom; needs delay + polarity alignment - current setup), or
-  - (b) KSub low-passed lower (e.g. ~60 Hz) to reinforce only the deepest band.
-  Measurement decides. Roadmap item 6 (separate outputs for tops/F1 subs/KSub) would let the DriveRack own every crossover - worth revisiting after this.
-- Also consider a subsonic high-pass (~25-30 Hz) on the sub output to save excursion - check what the KSub already does internally first.
+## The crossover question: DriveRack or KS212C?
+Tony's preference: **DriveRack**. The KS212C limits how far that can go.
+
+What the KS212C manual says:
+- Its low-pass is **80 Hz or 100 Hz - there is no bypass/thru**, so there is always one filter in the sub itself. Currently 80 Hz.
+- It has its own delay (0-100 ms). Keep it at **0** and do all delay on the DriveRack (`DelayOut3`), so there's one place to look.
+- Loop-thru outputs are unprocessed, so it can't high-pass anything downstream.
+- It's a fixed cardioid (15 dB rear rejection at 70 Hz): front toward the floor; rear rejection means less bounce off the wall behind it - matters for placement later.
+
+Options:
+- **(i) As now:** KS212C at 80 Hz is the crossover, DriveRack `Sub_LPFrequency` Out.
+- **(ii) DriveRack owns it (as far as possible):** KS212C set to **100 Hz** as an outer filter (least interference), DriveRack `Sub_LP` sets the real crossover at or below ~80 Hz, with a slope we choose. Two filters in series near 100 Hz, but that's fine: we align on the **measured** acoustic response, which includes both.
+- Recommendation: (ii), compared against (i) by measurement. Keep whichever integrates better with the F1 subs.
+
+Bigger picture: the F1 subs get full range and split to the 812s with their own fixed internal crossover, so the KS212C isn't really "crossing to tops" - it **overlaps** the F1 subs. The real choice is:
+  - (a) KS212C and F1 subs share the same bass band (more headroom; needs delay + polarity alignment - current setup), or
+  - (b) KS212C low-passed lower (e.g. ~60 Hz) to reinforce only the deepest band.
+  Measurement decides. Roadmap item 6 (separate outputs for tops/F1 subs/KS212C) would let the DriveRack own every crossover - worth revisiting after this.
+
+Subsonic high-pass (~30 Hz) on the DriveRack sub output: the KS212C is already -10 dB at 39 Hz, so this mostly keeps useless deep content out of its limiter. Measure with and without.
+
+Center (JBL EON610): -10 dB at 52 Hz, but the DriveRack high-pass is 50 Hz BW18. At club level the 10" is being asked for bass it can't make, while the subs already cover that range. Candidate: raise it to ~70-80 Hz. Measure first.
 
 ## Timing without loopback
 USB mic = no loopback, and the DJM and UMIK-2 run on different clocks. Use REW's **acoustic timing reference**:
 - Ref played on **L**, measurement sweep on **R**. Left stack (output 1) stays on as the "clock" for every measurement (agreed with Tony 2026-09-29).
 - Group under test is fed from R; DriveRack mutes the rest:
 
-| Measure | Out 1 (L stack) | Out 2 (R stack) | Out 3 (KSub) | Out 4 (Center) |
+| Measure | Out 1 (L stack) | Out 2 (R stack) | Out 3 (KS212C) | Out 4 (Center) |
 |---|---|---|---|---|
 | R stack | on (ref only) | **on** | mute | mute |
-| KSub | on (ref only) | mute | **on** | mute |
+| KS212C | on (ref only) | mute | **on** | mute |
 | Center | on (ref only) | mute | mute | **on** |
 | All | on | on | on | on |
 
-- KSub gets L+R, so it also receives the ref, but the ref is high-frequency and its low-pass rejects it.
+- KS212C gets L+R, so it also receives the ref, but the ref is high-frequency and its low-pass rejects it.
 - The center is muted for every measurement except its own, so it only matters then: **when the center is the one under test**, it gets L+R and plays the ref as well as the sweep - two ref arrivals. Options, in order:
   1. Dry run: see whether REW still locks on cleanly (the two arrivals are only ~1 ms apart plus distance).
   2. Find a DriveRack crosspoint that feeds output 4 from B (R) only for that one measurement. Not found yet - `MidRouter4` only exposes a master gain/mute; look in the app's routing screens.
@@ -82,16 +94,16 @@ Better option: a **5-10 m active USB extension for the UMIK-2**, so the laptop s
    - **Operating level:** with a loud mastered track at Tony's normal DJM master position, DriveRack input peaks should sit roughly 6-10 dB below clip. Too low = raise the DJM master and trim the DriveRack outputs down; too hot = the reverse.
    - Meters: read them in the VENU360 app or on the front panel. Unverified whether they can be read over UDP (`\\Node\DA`?) - check.
    - Record the DJM trim/fader/master marks and the meter readings in `measurements/<session>/`.
-3. **Noise floor:** everything on, no signal, DJM master at the operating mark. REW noise-floor capture at the centre spot, plus RTA about 1 m from each 812, the KSub and the center. Hum shows as peaks at 60/120/180 Hz (ground loop); broadband hiss that drops when the DJM master goes to zero is the mixer, and if it stays, it's the DriveRack or the speakers.
+3. **Noise floor:** everything on, no signal, DJM master at the operating mark. REW noise-floor capture at the centre spot, plus RTA about 1 m from each 812, the KS212C and the center. Hum shows as peaks at 60/120/180 Hz (ground loop); broadband hiss that drops when the DJM master goes to zero is the mixer, and if it stays, it's the DriveRack or the speakers.
 4. Timing reference works (and whether the center's double reference is a problem), then one sweep at the centre spot with everything on.
 
 **Session 1 - baseline (mutes only):** each group alone + all, at every spot. Save REW `.mdat` + exports to `measurements/2026-xx-xx-baseline/`. RT60 from the all-on runs.
 
-**Analysis (no changes):** group levels, KSub vs F1-sub delay and polarity (alignment tool, around the overlap band), response vs a club target (see `asr-nightclub-thread.md`), what AutoEQ1's boosts are actually doing. Output: a written proposal with exact values.
+**Analysis (no changes):** group levels, KS212C vs F1-sub delay and polarity (alignment tool, around the overlap band), response vs a club target (see `asr-nightclub-thread.md`), what AutoEQ1's boosts are actually doing. Output: a written proposal with exact values.
 
 **Session 2+ - changes, one at a time, Tony's OK for each, re-measure after each:**
-1. KSub low-pass on DriveRack (if chosen) + subsonic HP
-2. KSub delay and polarity vs F1 subs
+1. KS212C low-pass on DriveRack (if chosen) + subsonic HP
+2. KS212C delay and polarity vs F1 subs
 3. Group levels
 4. Replace AutoEQ1 boosts with measured cuts (PEQOut1 - there is no PEQOut2, so it probably serves both mains as a stereo pair; verify)
 5. Target curve shaping
@@ -105,9 +117,11 @@ Tony saves a new preset (#38) when happy; backup after.
 - `rew_to_driverack.py`: turn REW filters into proposed DriveRack PEQ values, printed for review, never applied automatically.
 
 ## Open items
-- [ ] KSub model and its crossover options (Tony is getting it)
+- [x] Sub is a QSC KS212C - crossover options from the manual (80/100 Hz, no bypass)
 - [ ] DJM-250MK2 visible to the Mac (driver?) - check in Session 0
-- [ ] Center speaker model (Tony)
+- [x] Center is a JBL EON610
+- [ ] Tony: KS212C display - confirm crossover 80 Hz and delay 0 ms
+- [ ] Tony: EON610 onboard EQ flat
 - [x] Left stack as the timing clock - yes
 - [x] Number of spots - as many as needed (core spots + grid, above)
 - [ ] Room sketch with dimensions, speaker positions and grid
