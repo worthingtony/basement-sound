@@ -77,6 +77,8 @@ Tony will move the laptop with the mic (no long USB-C cable). Two catches:
 - **The laptop also drives the DJM over USB.** If it moves around the floor, that cable has to reach too - it's the same problem at the other end.
 - **The laptop body reflects sound** into a mic right next to it. Keep it low (floor or a low cart), well below and behind the mic, never between mic and speakers.
 
+2026-09-29 cable test: the mic did not enumerate through the repeater, a hub, or two other cables/adapters, but works directly on a USB-C to USB-C cable. The repeater hasn't been retried with that known-good cable, so it is not yet ruled in or out.
+
 Better option: a **5-10 m active USB extension for the UMIK-2**, so the laptop stays at the booth next to the DJM and only the mic moves. Cheap, and it removes both catches. Unverified: that the UMIK-2 runs reliably on one - test in Session 0.
 
 ## Levels and safety
@@ -113,7 +115,7 @@ Better option: a **5-10 m active USB extension for the UMIK-2**, so the laptop s
 Tony saves a new preset (#38) when happy; backup after.
 
 ## Tooling to write (after the plan is agreed)
-- `rew_measure.py`: preflight (REW version, devices, cal file, sample rate, timing ref; DriveRack preset loaded and not modified), mute matrix over UDP with read-back, trigger sweep, name measurement `<group>-<spot>`, restore on exit. `--dry-run` prints everything without setting.
+- `rew_measure.py`: preflight (REW version, devices, **input = UMIK-2 with cal path `cal/8111561_90deg.txt` and dBFS@94 dB SPL = -16.25** - REW silently drops to "Default Device" and clears the cal if the mic disconnects, seen 2026-09-29; sample rate, timing ref; DriveRack preset loaded and not modified), mute matrix over UDP with read-back, trigger sweep, name measurement `<group>-<spot>`, restore on exit. `--dry-run` prints everything without setting.
 - `rew_to_driverack.py`: turn REW filters into proposed DriveRack PEQ values, printed for review, never applied automatically.
 
 ## Open items
