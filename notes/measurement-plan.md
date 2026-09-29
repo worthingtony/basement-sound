@@ -8,6 +8,8 @@ Status 2026-09-29: plan only. Nothing here has been run. Every DriveRack `set` (
 - REW sample rate is **48 kHz** (changed when the UMIK-2 was reselected, 2026-09-29; macOS agrees).
 - REW timing reference is **None** - change to Acoustic.
 - REW output is "Default Device". The DJM-250MK2 wasn't connected on 2026-09-29, so whether the Mac sees it without Pioneer's driver is still unchecked - first job of Session 0.
+- **REW API without a Pro licence (tested 2026-09-29):** GETs work; output device/channel and input device/cal can be set. Refused with "A Pro upgrade license is required": measure level, sweep configuration, protection options, naming, and **starting a measurement** (`/measure/command SPL`). So sweeps are started by hand in REW's window unless Tony buys Pro (roomeqwizard.com/upgrades.html; one-time, per user).
+- Gotcha: selecting the REW **output** device resets the **input** to "Default Device" and clears the cal. Always set output first, then input + cal, then read both back.
 - REW has no dbx EQ profile; use "Generic" / "Configurable PEQ" and translate filters to DriveRack PEQ bands by hand (script).
 
 ## Signal path
