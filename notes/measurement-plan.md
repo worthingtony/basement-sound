@@ -7,7 +7,7 @@ Status 2026-09-29: plan only. Nothing here has been run. Every DriveRack `set` (
 - REW input: **UMIK-2**, cal file `cal/8111561_90deg.txt` (the 90° file - correct for mic pointing up; serial 8111561). REW points at the repo copy ("Input cal processed", 2026-09-29).
 - REW sample rate is **44.1 kHz** - change to 48 kHz.
 - REW timing reference is **None** - change to Acoustic.
-- REW output is "Default Device". **The DJM-250MK2 is not visible to the Mac right now** (not in REW's list or System Information). Unknown whether it's just unplugged or needs Pioneer's driver.
+- REW output is "Default Device". The DJM-250MK2 wasn't connected on 2026-09-29, so whether the Mac sees it without Pioneer's driver is still unchecked - first job of Session 0.
 - REW has no dbx EQ profile; use "Generic" / "Configurable PEQ" and translate filters to DriveRack PEQ bands by hand (script).
 
 ## Signal path
@@ -30,7 +30,7 @@ Recommendation: **DriveRack** - agreeing with Tony - with one condition.
 
 ## Timing without loopback
 USB mic = no loopback, and the DJM and UMIK-2 run on different clocks. Use REW's **acoustic timing reference**:
-- Ref played on **L**, measurement sweep on **R**. Left stack (output 1) stays on as the "clock" for every measurement.
+- Ref played on **L**, measurement sweep on **R**. Left stack (output 1) stays on as the "clock" for every measurement (agreed with Tony 2026-09-29).
 - Group under test is fed from R; DriveRack mutes the rest:
 
 | Measure | Out 1 (L stack) | Out 2 (R stack) | Out 3 (KSub) | Out 4 (Center) |
@@ -41,13 +41,31 @@ USB mic = no loopback, and the DJM and UMIK-2 run on different clocks. Use REW's
 | All | on | on | on | on |
 
 - KSub gets L+R, so it also receives the ref, but the ref is high-frequency and its low-pass rejects it.
-- **Wrinkle to test in the dry run:** the center also gets L+R, so it plays the ref too - a second ref arrival could confuse REW. If it does, measure the center with a different scheme.
+- The center is muted for every measurement except its own, so it only matters then: **when the center is the one under test**, it gets L+R and plays the ref as well as the sweep - two ref arrivals. Options, in order:
+  1. Dry run: see whether REW still locks on cleanly (the two arrivals are only ~1 ms apart plus distance).
+  2. Find a DriveRack crosspoint that feeds output 4 from B (R) only for that one measurement. Not found yet - `MidRouter4` only exposes a master gain/mute; look in the app's routing screens.
+  3. Fallback: take the center's magnitude response with no timing ref, and set its delay by ear/impulse from an all-on measurement.
 - Left stack alone: mirror image (ref on R, right stack as clock) - or check whether REW allows ref and sweep on the same channel.
 
 ## Mic positions
+Tony: "as many as we need" - the spread is what makes room-treatment needs obvious.
+
 - Mic at standing head height (~1.6-1.7 m), pointing straight up, 90° cal file.
-- 5 taped spots on the dance floor (centre + 4 around it) + DJ booth. Same spots every session.
-- Needs: long USB cable for the UMIK-2 or the laptop moving with the mic.
+- **Room sketch first:** dimensions, speaker positions and heights, a grid on the floor. Every measurement name carries its grid reference.
+- **Two tiers**, so the session stays manageable:
+  - **Core spots (~6):** 5 on the dance floor (centre + 4 around it) + DJ booth. Every group alone + all on. These drive the tuning decisions.
+  - **Grid (~1 m spacing, the whole floor plus anywhere people stand or sit):** all on only. These drive the treatment decisions.
+- What the grid shows:
+  - Big spot-to-spot swings below ~300 Hz = room modes -> sub placement and bass traps.
+  - Long decay (RT60/waterfall) in a band -> absorption needed there.
+  - Strong early spikes in the impulse (ETC) at a spot -> a first-reflection surface worth a panel.
+
+### Laptop logistics
+Tony will move the laptop with the mic (no long USB-C cable). Two catches:
+- **The laptop also drives the DJM over USB.** If it moves around the floor, that cable has to reach too - it's the same problem at the other end.
+- **The laptop body reflects sound** into a mic right next to it. Keep it low (floor or a low cart), well below and behind the mic, never between mic and speakers.
+
+Better option: a **5-10 m active USB extension for the UMIK-2**, so the laptop stays at the booth next to the DJM and only the mic moves. Cheap, and it removes both catches. Unverified: that the UMIK-2 runs reliably on one - test in Session 0.
 
 ## Levels and safety
 - Capture noise floor first.
@@ -78,9 +96,13 @@ Tony saves a new preset (#38) when happy; backup after.
 - `rew_to_driverack.py`: turn REW filters into proposed DriveRack PEQ values, printed for review, never applied automatically.
 
 ## Open items
-- [ ] KSub model and its crossover options
-- [ ] DJM-250MK2 visible to the Mac (driver?)
-- [ ] Center speaker model
-- [ ] OK with left stack as the timing clock?
-- [ ] Number of spots, max SPL for the loud pass
+- [ ] KSub model and its crossover options (Tony is getting it)
+- [ ] DJM-250MK2 visible to the Mac (driver?) - check in Session 0
+- [ ] Center speaker model (Tony)
+- [x] Left stack as the timing clock - yes
+- [x] Number of spots - as many as needed (core spots + grid, above)
+- [ ] Room sketch with dimensions, speaker positions and grid
+- [ ] Laptop moves vs active USB extension for the mic
+- [ ] Center timing method (see Timing section)
+- [ ] Max SPL for the loud pass
 - [x] Cal file moved into the repo (`cal/`) and REW repointed
