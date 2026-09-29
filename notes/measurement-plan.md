@@ -5,7 +5,7 @@ Status 2026-09-29: plan only. Nothing here has been run. Every DriveRack `set` (
 ## What's verified so far
 - REW **5.40 Beta 120, API 0.9.4**, running on `localhost:4735`. API has what we need: `measure` (sweeps, acoustic timing reference), `alignment-tool` (sub delay/polarity), `eq` (house curve, match target), `measurements/{id}/rt60`, `spl-meter`, `generator`.
 - REW input: **UMIK-2**, cal file `cal/8111561_90deg.txt` (the 90° file - correct for mic pointing up; serial 8111561). REW points at the repo copy ("Input cal processed", 2026-09-29).
-- REW sample rate is **44.1 kHz** - change to 48 kHz.
+- REW sample rate is **48 kHz** (changed when the UMIK-2 was reselected, 2026-09-29; macOS agrees).
 - REW timing reference is **None** - change to Acoustic.
 - REW output is "Default Device". The DJM-250MK2 wasn't connected on 2026-09-29, so whether the Mac sees it without Pioneer's driver is still unchecked - first job of Session 0.
 - REW has no dbx EQ profile; use "Generic" / "Configurable PEQ" and translate filters to DriveRack PEQ bands by hand (script).
@@ -77,7 +77,7 @@ Tony will move the laptop with the mic (no long USB-C cable). Two catches:
 - **The laptop also drives the DJM over USB.** If it moves around the floor, that cable has to reach too - it's the same problem at the other end.
 - **The laptop body reflects sound** into a mic right next to it. Keep it low (floor or a low cart), well below and behind the mic, never between mic and speakers.
 
-2026-09-29 cable test: the mic did not enumerate through the repeater, a hub, or two other cables/adapters, but works directly on a USB-C to USB-C cable. The repeater hasn't been retried with that known-good cable, so it is not yet ruled in or out.
+**Resolved 2026-09-29: Mac -> dock -> BlueRigger 10 m USB 2.0 active repeater -> USB-C to USB-A data cable -> UMIK-2.** Laptop stays at the booth next to the DJM; only the mic moves. Earlier failures were all cables without data lines, not the repeater. 4 min listen-only test through the repeater: no disconnects, no REW errors. Not yet proven: glitch-free sweeps (REW reports those during a measurement) - check in Session 0.
 
 Better option: a **5-10 m active USB extension for the UMIK-2**, so the laptop stays at the booth next to the DJM and only the mic moves. Cheap, and it removes both catches. Unverified: that the UMIK-2 runs reliably on one - test in Session 0.
 
@@ -127,7 +127,7 @@ Tony saves a new preset (#38) when happy; backup after.
 - [x] Left stack as the timing clock - yes
 - [x] Number of spots - as many as needed (core spots + grid, above)
 - [ ] Room sketch with dimensions, speaker positions and grid
-- [ ] Laptop moves vs active USB extension for the mic
+- [x] Mic on the BlueRigger 10 m repeater; laptop stays at the booth
 - [ ] Center timing method (see Timing section)
 - [ ] Max SPL for the loud pass
 - [x] Cal file moved into the repo (`cal/`) and REW repointed
