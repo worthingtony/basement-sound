@@ -2,6 +2,11 @@
 
 Status 2026-09-29: plan only. Nothing here has been run. Every DriveRack `set` (including mutes) needs Tony's OK per session.
 
+## BLOCKED 2026-09-29: UMIK-2 (serial 8111561) is faulty
+Enumerates fine (USB 2.0 high speed, 48 kHz, macOS input volume 100) but passes only ~34 dB SPL of self-noise - no response to claps or a loud sweep. Same result through the dock/repeater, plugged directly into the Mac (macOS Sound input meter flat), and on Tony's iPhone. Re-flashing firmware v2.06 didn't help. So every REW test that day was mic noise; the 34 dB "quiet room" reading was never the room.
+
+Everything else was proven working that day: REW 5.40 beta 135 with a Pro licence (API sweeps start, settings apply), DJM-250MK2 as REW output (sweep audible in the room), cal file, BlueRigger repeater path. Resume at Session 0 with a working mic.
+
 ## What's verified so far
 - REW **5.40 Beta 120, API 0.9.4**, running on `localhost:4735`. API has what we need: `measure` (sweeps, acoustic timing reference), `alignment-tool` (sub delay/polarity), `eq` (house curve, match target), `measurements/{id}/rt60`, `spl-meter`, `generator`.
 - REW input: **UMIK-2**, cal file `cal/8111561_90deg.txt` (the 90° file - correct for mic pointing up; serial 8111561). REW points at the repo copy ("Input cal processed", 2026-09-29).
