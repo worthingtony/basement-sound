@@ -21,10 +21,12 @@ Tony's basement DJ system (separate from the upstairs home theater). Goal: sound
 |---|---|---|
 | 1 | Left Main | Left F1 Subwoofer (Input 2 in) -> its line out -> left Bose F1 Model 812 |
 | 2 | Right Main | Right F1 Subwoofer (Input 1 in) -> its line out -> right Bose F1 Model 812 |
-| 3 | Mono Sub | QSC KSub, own crossover at 80 Hz (Tony can change it) |
-| 4 | Center Main | Center fill (model TBD), fed L+R sum; HP 50 Hz BW18, delay 0.69 ms, +2.9 dB, limiter on |
+| 3 | Mono Sub | QSC **KS212C** (not a KSub - the preset and wizard names are historical) |
+| 4 | Center Main | Center fill **JBL EON610**, fed L+R sum; HP 50 Hz BW18, delay 0.69 ms, +2.9 dB, limiter on |
 | 5, 6 | Output 5 / 6 | Unnamed, status unknown |
 
+- KS212C: dual 12" in dual 6th-order bandpass, **fixed cardioid** (15 dB rear rejection at 70 Hz - front must face the floor), 2x1800 W peak, 132 dB peak, -6 dB 44-104 Hz, -10 dB 39-118 Hz. Onboard DSP (front display): low-pass **80 Hz or 100 Hz only - no bypass**, currently 80 Hz; delay 0-100 ms (keep at 0 - delay lives on the DriveRack; not yet confirmed it reads 0); 5 user scenes. Loop-thru outputs are unprocessed full range. Source: QSC KS Series user manual.
+- EON610: 10" 2-way, 1000 W peak, +/-3 dB 60 Hz-20 kHz, -10 dB 52 Hz, 124 dB max, 110x60°. Onboard 3 PEQ + hi/lo shelf, no high-pass - keep its EQ flat (not yet confirmed). DriveRack wizard lists it as "EON10G2" - name only.
 - F1 Subs: Line Output EQ **THRU** (Bose-recommended when feeding an 812 set to WITH SUB; HPF would double-filter), polarity NORM, volume ~4 o'clock.
 - 812 tops: EQ WITH SUB, Signal Input LINE LEVEL, Ch 1 volume ~1-2 o'clock.
 - Mains (outputs 1/2) run full range from the DriveRack; the F1 Sub/812 pairing handles their split.
