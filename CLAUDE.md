@@ -35,7 +35,7 @@ Tony's basement DJ system (separate from the upstairs home theater). Goal: sound
 1. Optional ear test: QSC's own crossover (80 Hz vs higher). Re-check polarity after any crossover change; keep QSC volume constant while comparing.
 2. QSC level trim by ear.
 3. Measure with REW + UMIK-2: each group alone (mute outputs via DriveRack), then all together, several positions. Open questions: how the Mac feeds audio into the system; room size/surfaces/layout.
-4. Tune: QSC delay vs F1 subs (REW acoustic timing reference, since USB mic has no loopback), levels, replace AutoEQ boosts with cuts, club-style target curve (lifted low end), center fill delay/level.
+4. Tune (target-curve ideas: `notes/asr-nightclub-thread.md`): QSC delay vs F1 subs (REW acoustic timing reference, since USB mic has no loopback), levels, replace AutoEQ boosts with cuts, club-style target curve (lifted low end), center fill delay/level.
 5. Placement, then room treatment, then hardware only if measurements show it's the limit.
 6. Optional: rewire so tops, F1 subs and QSC each get their own DriveRack output.
 
@@ -45,6 +45,7 @@ Tony's basement DJ system (separate from the upstairs home theater). Goal: sound
 - `backups/venu360_full_backup_2026-09-28_2312.json` - state of preset #36 before any changes (file name time is UTC; 6:12 pm local). Trustworthy.
 - `backups/venu360_full_backup_2026-09-29_0528_preset37.json` - preset #37 after saving.
 - `backups/venu360_config_snapshot.txt` - human-readable dump of #36.
+- `notes/asr-nightclub-thread.md` - takeaways from the ASR "nightclub speakers" thread, mapped to this system (forum opinion, unverified).
 
 ## DriveRack VENU360 control protocol
 Unit: 172.16.0.230, firmware 2.0.5.0, QNX-based.
