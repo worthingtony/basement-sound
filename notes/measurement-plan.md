@@ -11,7 +11,7 @@ Status 2026-09-29: plan only. Nothing here has been run. Every DriveRack `set` (
 - REW has no dbx EQ profile; use "Generic" / "Configurable PEQ" and translate filters to DriveRack PEQ bands by hand (script).
 
 ## Signal path
-Mac -> USB -> DJM-250MK2 (one channel, input set to USB) -> master out -> DriveRack In A/B -> outputs 1-4.
+Mac -> USB -> DJM-250MK2 (one channel, input set to USB) -> master out (**balanced XLR**, per Tony) -> DriveRack In A/B -> outputs 1-4.
 
 DJM must be a fixed, known, flat stage for every measurement:
 - Channel EQ at 0 (centre detents), Sound Color FX off, crossfader not cutting that channel, channel fader and master at marked positions, trim noted.
