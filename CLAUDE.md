@@ -29,7 +29,7 @@ Tony's basement DJ system (separate from the upstairs home theater). Goal: sound
 - 812 tops: EQ WITH SUB, Signal Input LINE LEVEL, Ch 1 volume ~1-2 o'clock.
 - Mains (outputs 1/2) run full range from the DriveRack; the F1 Sub/812 pairing handles their split.
 - AutoEQ1 (mains room EQ, ON) has narrow +6 dB boosts (39.7 Hz Q12.4, 115/160/190 Hz, 399 Hz) - AutoEQ filling room nulls. Candidate to replace with measured cuts. All output PEQs, input PEQ, GEQs are off/flat.
-- Measurement kit: miniDSP UMIK-2 with calibration file (use the 90° file, mic pointing up at head height on the dance floor). REW not yet confirmed installed.
+- Measurement kit: miniDSP UMIK-2 (serial 8111561), cal file `cal/8111561_90deg.txt` (90° file, mic pointing up at head height on the dance floor); REW's input cal points at it. REW 5.40 Beta 120 installed, API enabled. Plan: `notes/measurement-plan.md`.
 
 ## Roadmap
 1. Optional ear test: QSC's own crossover (80 Hz vs higher). Re-check polarity after any crossover change; keep QSC volume constant while comparing.
@@ -45,6 +45,8 @@ Tony's basement DJ system (separate from the upstairs home theater). Goal: sound
 - `backups/venu360_full_backup_2026-09-28_2312.json` - state of preset #36 before any changes (file name time is UTC; 6:12 pm local). Trustworthy.
 - `backups/venu360_full_backup_2026-09-29_0528_preset37.json` - preset #37 after saving.
 - `backups/venu360_config_snapshot.txt` - human-readable dump of #36.
+- `notes/measurement-plan.md` - REW + DriveRack measurement plan (draft, not yet agreed).
+- `cal/8111561_90deg.txt` - UMIK-2 90° calibration file (REW reads it from here - don't move it).
 - `notes/asr-nightclub-thread.md` - takeaways from the ASR "nightclub speakers" thread, mapped to this system (forum opinion, unverified).
 
 ## DriveRack VENU360 control protocol
