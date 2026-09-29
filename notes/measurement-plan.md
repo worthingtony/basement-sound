@@ -74,7 +74,16 @@ Better option: a **5-10 m active USB extension for the UMIK-2**, so the laptop s
 - All mutes go through a script that reads back every set and **restores on exit, including Ctrl-C** (fallback: reload preset #37).
 
 ## Sessions
-**Session 0 - dry run (no mutes, no DriveRack changes):** DJM visible to Mac, REW at 48 kHz, output = DJM, timing ref works, one sweep at the centre spot with everything on.
+**Session 0 - dry run (no DriveRack changes except the optional mute in step 2):**
+1. Setup: DJM visible to the Mac, REW at 48 kHz, output = DJM, UMIK-2 on the active extension if we got one.
+2. **Signal-chain check** (DJM master XLR -> DriveRack In A/B, balanced):
+   - Confirm the DriveRack inputs are on analog, not AES (read-only: `AESCh12Input` / `AESCh34Input`).
+   - **Clip check, speakers protected** - DriveRack outputs muted (needs Tony's OK) or amps/powered speakers off (Tony). REW pink noise into the DJM channel, DJM channel fader and master up to full: does the DriveRack input meter clip? If it does, mark the DJM master's safe maximum.
+   - **Operating level:** with a loud mastered track at Tony's normal DJM master position, DriveRack input peaks should sit roughly 6-10 dB below clip. Too low = raise the DJM master and trim the DriveRack outputs down; too hot = the reverse.
+   - Meters: read them in the VENU360 app or on the front panel. Unverified whether they can be read over UDP (`\\Node\DA`?) - check.
+   - Record the DJM trim/fader/master marks and the meter readings in `measurements/<session>/`.
+3. **Noise floor:** everything on, no signal, DJM master at the operating mark. REW noise-floor capture at the centre spot, plus RTA about 1 m from each 812, the KSub and the center. Hum shows as peaks at 60/120/180 Hz (ground loop); broadband hiss that drops when the DJM master goes to zero is the mixer, and if it stays, it's the DriveRack or the speakers.
+4. Timing reference works (and whether the center's double reference is a problem), then one sweep at the centre spot with everything on.
 
 **Session 1 - baseline (mutes only):** each group alone + all, at every spot. Save REW `.mdat` + exports to `measurements/2026-xx-xx-baseline/`. RT60 from the all-on runs.
 
