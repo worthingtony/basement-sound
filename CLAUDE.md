@@ -45,7 +45,7 @@ Tony's basement DJ system (separate from the upstairs home theater). Goal: sound
 - `backups/venu360_full_backup_2026-09-28_2312.json` - state of preset #36 before any changes (file name time is UTC; 6:12 pm local). Trustworthy.
 - `backups/venu360_full_backup_2026-09-29_0528_preset37.json` - preset #37 after saving.
 - `backups/venu360_config_snapshot.txt` - human-readable dump of #36.
-- (On the Desktop, ignore `venu360_full_backup_2026-09-28_2307.BAD-misaligned.json` - values shifted by one block.)
+- Not in this repo: `~/Desktop/venu360_full_backup_2026-09-28_2307.BAD-misaligned.json` - values shifted by one block, never use it.
 
 ## DriveRack VENU360 control protocol
 Unit: 172.16.0.230, firmware 2.0.5.0, QNX-based.
