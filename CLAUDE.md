@@ -32,11 +32,12 @@ Tony's basement DJ system (separate from the upstairs home theater). Goal: sound
 - Mains (outputs 1/2) run full range from the DriveRack; the F1 Sub/812 pairing handles their split.
 - AutoEQ1 (mains room EQ, ON) has narrow +6 dB boosts (39.7 Hz Q12.4, 115/160/190 Hz, 399 Hz) - AutoEQ filling room nulls. Candidate to replace with measured cuts. All output PEQs, input PEQ, GEQs are off/flat.
 - Measurement kit: miniDSP UMIK-2 (serial 8111561), cal file `cal/8111561_90deg.txt` (90° file, mic pointing up at head height on the dance floor); REW's input cal points at it. REW 5.40 Beta 120 installed, API enabled. Plan: `notes/measurement-plan.md`.
+- **2026-10-18: the UMIK-2 is defective - measurement is blocked until there's a working mic.** Next steps: warranty claim with miniDSP (have serial and purchase info; note how it fails - try another USB cable/port and check Audio MIDI Setup). Recommended stopgap: a miniDSP **UMIK-1** (same REW workflow, own cal file - a new cal file goes in `cal/` and REW's input cal must be repointed). Tony has no audio interface, so the dbx RTA-M (XLR, needs 48V phantom; no individual cal file) isn't usable with REW unless he buys one (e.g., a 2-input Focusrite Scarlett 2i2, which would also allow loopback timing). The RTA-M would be fine for bass, timing, polarity and levels, but not for high-frequency EQ.
 
 ## Roadmap
 1. Optional ear test: QSC's own crossover (80 Hz vs higher). Re-check polarity after any crossover change; keep QSC volume constant while comparing.
 2. QSC level trim by ear.
-3. Measure with REW + UMIK-2: each group alone (mute outputs via DriveRack), then all together, several positions. Open questions: how the Mac feeds audio into the system; room size/surfaces/layout.
+3. **(Blocked: needs a working mic - see Measurement kit.)** Measure with REW + UMIK-2: each group alone (mute outputs via DriveRack), then all together, several positions. Open questions: how the Mac feeds audio into the system; room size/surfaces/layout.
 4. Tune (target-curve ideas: `notes/asr-nightclub-thread.md`): QSC delay vs F1 subs (REW acoustic timing reference, since USB mic has no loopback), levels, replace AutoEQ boosts with cuts, club-style target curve (lifted low end), center fill delay/level.
 5. Placement, then room treatment, then hardware only if measurements show it's the limit.
 6. Optional: rewire so tops, F1 subs and QSC each get their own DriveRack output.
