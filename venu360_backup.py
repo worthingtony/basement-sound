@@ -8,11 +8,16 @@ Read-only full backup of the DriveRack VENU360 (all SV parameters) to backups/.
 Replies are matched to requests by the echoed path and read until "endls", because
 large blocks (AutoEQ curves) arrive in several datagrams and can arrive late.
 Only sends 'ls' commands - never changes anything.
+
+The admin password and the BLU link/Dante MAC addresses are written as "<redacted>"
+and left out of --diff, because this repo is public.
 """
 import json, os, re, socket, sys, time
 
 UNIT = ("172.16.0.230", 19272)
 HERE = os.path.dirname(os.path.abspath(__file__))
+REDACT = re.compile(r"\\SV\\(Password|MacAddr|MasterMacAddr|PrimaryMacAddr|SecondaryMacAddr)$")
+REDACTED = "<redacted>"
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 def ls(path, tries=2):
@@ -43,7 +48,8 @@ def dump():
     for p in paths:
         r = ls(p)
         if r is None: skipped.append(p); continue
-        for k, v in r: params[p + "\\" + k] = v
+        for k, v in r:
+            params[p + "\\" + k] = REDACTED if REDACT.search(p + "\\" + k) else v
     return params, skipped
 
 if __name__ == "__main__":
@@ -58,6 +64,6 @@ if __name__ == "__main__":
         old = json.load(open(sys.argv[sys.argv.index("--diff") + 1]))["params"]
         live = re.compile(r"Meter|GainReduction|MaxInputLevel")
         diffs = [(k, old.get(k), params.get(k)) for k in sorted(set(old) | set(params))
-                 if old.get(k) != params.get(k) and not live.search(k)]
+                 if old.get(k) != params.get(k) and not live.search(k) and not REDACT.search(k)]
         print(f"{len(diffs)} differences vs {os.path.basename(sys.argv[sys.argv.index('--diff') + 1])}:")
         for k, a, b in diffs: print(f"  {k}: {str(a)[:40]!r} -> {str(b)[:40]!r}")
