@@ -26,11 +26,16 @@ Measurement kit: a miniDSP UMIK-2 with REW.
 | [`CLAUDE.md`](CLAUDE.md) | The full record: wiring, current settings, roadmap, and the DriveRack's control protocol |
 | `venu360_backup.py` | Read-only full dump of the DriveRack's settings to `backups/` (`--diff` compares) |
 | `venu360_xover_ab.py` | Switches the QSC crossover and polarity for A/B listening, reading back every change |
-| `backups/` | Saved states of presets #36 and #37 |
+| `backups/` | Saved states of presets #36 and #37 (the admin password and MAC addresses are redacted) |
 | `notes/` | The measurement plan, and takeaways from a forum thread on nightclub sound |
 | `cal/` | The microphone's calibration file (REW reads it from here - don't move it) |
+| `scripts/scrub-history.sh` | One-off: purges the redacted values from git history before the repo went public |
 
 ## Rules
 
 - **No changes to the DriveRack without Tony's OK.** Reading is always fine.
 - Back up before a session of changes, change one thing at a time, and read back every setting so it can be judged by ear.
+
+## License
+
+MIT - see [`LICENSE`](LICENSE).

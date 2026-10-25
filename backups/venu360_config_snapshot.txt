@@ -1,7 +1,7 @@
 # DriveRack VENU360 config snapshot (read-only dump) - 172.16.0.230
 
 [\\Node\SV]
-  Password = administrator
+  Password = <redacted>
   Reboot = No
   DeviceName = My DriveRack
   HardwareVersion = Standard

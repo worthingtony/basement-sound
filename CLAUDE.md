@@ -44,13 +44,14 @@ Tony's basement DJ system (separate from the upstairs home theater). Goal: sound
 
 ## Files here
 - `venu360_xover_ab.py` - `A` / `B` (QSC crossover 102 Hz/Out vs Out/Out), `normal` / `invert` (QSC polarity), `status`. Read-back verified; B auto-reverts to A on failure. Note: preset 37 already has B + Inverted.
-- `venu360_backup.py` - read-only full dump to `backups/`, optional `--diff`.
+- `venu360_backup.py` - read-only full dump to `backups/`, optional `--diff`. Writes the admin password and MAC fields as `<redacted>` and `--diff` skips them, because the repo is public; the committed backups are redacted the same way.
 - `backups/venu360_full_backup_2026-09-28_2312.json` - state of preset #36 before any changes (file name time is UTC; 6:12 pm local). Trustworthy.
 - `backups/venu360_full_backup_2026-09-29_0528_preset37.json` - preset #37 after saving.
 - `backups/venu360_config_snapshot.txt` - human-readable dump of #36.
 - `notes/measurement-plan.md` - REW + DriveRack measurement plan (draft, not yet agreed).
 - `cal/8111561_90deg.txt` - UMIK-2 90° calibration file (REW reads it from here - don't move it).
 - `notes/asr-nightclub-thread.md` - takeaways from the ASR "nightclub speakers" thread, mapped to this system (forum opinion, unverified).
+- `scripts/scrub-history.sh` - one-off history rewrite that purged the password and MAC values before going public (#3). Header says how to run it.
 
 ## DriveRack VENU360 control protocol
 Unit: 172.16.0.230, firmware 2.0.5.0, QNX-based.
