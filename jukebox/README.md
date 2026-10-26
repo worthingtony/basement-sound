@@ -277,8 +277,24 @@ Remote running on the MacBook and paired, `tcpdump` on `lo0` (no sudo - Wireshar
 on VLAN 1, let VirtualDJ connect, and use type 36 (catalogue and search by path) and type 50
 (add by path, at a position). **No browser steering at all.** Network Control stays as a fallback.
 Risks: undocumented, could change with a VirtualDJ update; Tony accepts the app once in VirtualDJ's
-Remote accept list. **Next:** record the handshake (the session above was already open) - Tony quits
-and reopens the Remote during a capture.
+Remote accept list.
+
+**Handshake, recorded 2026-10-25** (Tony quit and reopened the Remote):
+- **The port is not fixed.** The reopened Remote listened on 4244 (4243 was still held) and
+  VirtualDJ followed the Bonjour advert; it also kept retrying the old port every 2 s. Follow the
+  advert, never assume 4243.
+- **No login, no encryption, no challenge.** VirtualDJ opens with two 120-byte type 43 deck-state
+  blocks (floats) and type 54 skin settings (`vinylMode yes`, …); the Remote answers type 39 and
+  type 64 `<info build="9618" skin="Default:4x3T" width=… />`, then asks for folders by path (type 36:
+  `sidelist`, `sampler`, `playlist`, `karaoke`, root). VirtualDJ answers with **XML** (type 37):
+  `<folderchildren path="" total="7">…<child name="Local Music" path="localmusic:"…/>` and
+  `<foldercontent path="sidelist" … hasorder="yes" canmove="yes" candelete="yes">`.
+- Button registrations (type 1) carry a 4-byte deck tag stored reversed: `tfel` = `left`, `hgir` =
+  `righ`, then the VDJScript (`goto_bar 1`).
+- **Accept list = device names.** `settings.xml` (written on quit, so stale) has
+  `vdjRemoteDevices` = `Tonys iPhone`, `iRemoteDefaultPort` = 4243. A fake remote advertises its own
+  name and Tony accepts it once. Name-based, so anything on VLAN 1 could claim an accepted name -
+  acceptable on the house LAN, worth knowing.
 
 ### Already installed that overlaps (checked 2026-10-25)
 | What | Version | Overlap |
