@@ -327,15 +327,12 @@ stored reversed (`bool` uint32, `val` float32, `txt` uint32 length + UTF-8, `fai
 - VirtualDJ also pushes, unasked: deck-state blocks (43), skin settings (54), the loaded song as XML
   (55), cues (40), beatgrid (67), waveform (42) and cover art (44, JPEG) - the TV page can use the art.
 
-**Build step 1 - done 2026-10-25: `jukebox/app/`.**
-- `vdjremote.py` - the protocol: framing, query registration and pushed values, folders by path
-  (plain or zipped), `add_to_automix(song, position)` with read-back. Standard library only; the
-  Bonjour advert is macOS `dns-sd` for now - the HA app needs its own (zeroconf, in its image).
-- `cli.py` - `python3 -m jukebox.app.cli nowplaying | folder PATH | automix | add CATALOGUE PATH POS`.
-- `test_vdjremote.py` - 6 unit tests from bytes seen on the wire (`python3 -m unittest
-  jukebox.app.test_vdjremote`), no library paths in them.
-- Verified live from the MacBook (temporary - it runs only while a command runs): folder by path,
-  Automix list, add at an exact position (earlier probe), now playing.
+**Build step 1 - done 2026-10-25; the app now lives in its own repo:
+[worthingtony/studio841-jukebox](https://github.com/worthingtony/studio841-jukebox)** (public, so the HA
+app store can install it - Tony, 2026-10-25). Version 0.1.0 ([PR #1](https://github.com/worthingtony/studio841-jukebox/pull/1)):
+the protocol client (moved from `jukebox/app/` here), flow scoring (tempo + Camelot key), the
+round-robin + flow planner, the service with an ingress status page, and autopilot (off by default).
+15 unit tests; ran read-only from the MacBook; not yet on the Pi.
 
 **Search, checked 2026-10-25.** Type 36 `search://<term>` searches everything VirtualDJ can: for
 `daft punk`, 402 results in three waves over ~2 s (0 -> 26 -> 127 -> 402, then an
@@ -367,12 +364,12 @@ wiki), so registering a script never runs it.
 
 ### Build order
 0. ~~Probe: list the playlist~~ done 2026-10-25 (above). Still to prove: exact-match add of a search hit that isn't the top result.
-1. ~~App skeleton: VirtualDJ client, catalogue, exact add~~ - done 2026-10-25 on the Remote protocol (`jukebox/app/`); still to run from HA.
-2. Queue + top-up loop + fallback runway; a night with no guests.
+1. ~~App skeleton~~ - done 2026-10-25: studio841-jukebox 0.1.0. Still to do: install on the Pi and accept it in VirtualDJ.
+2. Queue + top-up loop + fallback runway **with flow ordering** (tempo, Camelot key, 2-slot fairness limit - Tony, 2026-10-25); planner and autopilot are in 0.1.0, a night with no guests still to run.
 3. Admin face: ingress page + MQTT entities + health alert.
 4. Request and TV faces on the house LAN (kiosk first).
 5. Guest Wi-Fi rule; phones.
-6. Phase 2: fallback by BPM and key.
+6. ~~Phase 2: fallback by BPM and key~~ - moved into step 2.
 
 ## Sources
 - [VDJScript verb list](https://virtualdj.com/manuals/virtualdj/appendix/vdjscriptverbs.html)
