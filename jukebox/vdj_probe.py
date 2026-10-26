@@ -90,6 +90,9 @@ def find(term):
     script = f'search "{term}"'
     print(f"execute {script} -> {execute(script)!r}")
     time.sleep(1.5)  # VirtualDJ fills search results asynchronously
+    # Focus the song list: with the Automix list focused, automix_add_next moves the song
+    # selected there instead of adding the search hit (found 2026-10-25)
+    print(f"execute browser_window 'songs' -> {execute("browser_window 'songs'")!r}")
     hit = song("get_browsed_song")
     print(f"Browser shows {query('file_count')!r} files; selected: {label(hit)!r}")
     print(f"Selected file: {query('get_browsed_filepath')!r}")
@@ -107,8 +110,10 @@ def add(term):
     time.sleep(0.5)
     after = automix_state()
     print(f"Automix after:  {after}")
-    landed = after["next"] == label(hit)
     grew = before["count"] != after["count"]
+    # the selection can already be the next song (2026-10-25: the browser was on Automix),
+    # so it only counts if the list grew and the next song changed to the hit
+    landed = grew and after["next"] == label(hit) and before["next"] != label(hit)
     print(f"Next in Automix is the selected song: {'YES' if landed else 'NO'}; "
           f"list count changed: {'yes' if grew else 'no'}")
     sys.exit(0 if landed else 1)

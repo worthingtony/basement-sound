@@ -1,7 +1,8 @@
 # Hands-off jukebox (VirtualDJ)
 
 **Status 2026-10-25:** design agreed. Network Control is on and the probe's `read` works against
-VirtualDJ on the MacBook. **`add` (the gating question) not yet run.** Nothing is built past the probe.
+VirtualDJ on the MacBook. **The gating question is answered: yes** - a script can put a chosen song
+next in Automix (below). Nothing is built past the probe.
 
 ## Goal
 A TouchTunes-style jukebox for the basement: guests pick songs on a wall kiosk or their
@@ -90,6 +91,19 @@ Automix stopped, one song in its list. Deck 1 loaded, deck 2 empty, neither audi
 - `is_audible` answers `yes`/`no` - good for the TV page.
 - Empty values (deck 2, Automix next) come back as `error:-2147…` strings, not blanks. The
   probe now treats them as empty; the service will have to as well.
+
+### The gating question - answered 2026-10-25
+`search "claude von stroke deep throat"`, then `browser_window 'songs'`, then `automix_add_next`
+put Claude VonStroke - Deep Throat next in Automix while it played (list 3 -> 4, read back).
+- **Focus matters.** The first try skipped `browser_window 'songs'`: the Automix list had focus,
+  so `get_browsed_song` read *its* selection, and `automix_add_next` - which, per the verb list,
+  moves a selected Automix song when Automix is active - added nothing. The probe reported a
+  false YES because that song was already next; it now requires the list to grow.
+- **Search is fuzzy, and the top hit can be a stream.** The three hits included library and
+  Beatport results; the one selected was `netsearch://bp48803`. The service should check
+  `get_browsed_filepath` against the guest's pick before adding, and decide whether guests
+  may get streaming tracks (they need the connection and subscription up during a party).
+- Not tested yet: how Automix mixes the added song in, and what happens when the list runs out.
 
 ## Sources
 - [VDJScript verb list](https://virtualdj.com/manuals/virtualdj/appendix/vdjscriptverbs.html)
