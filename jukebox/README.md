@@ -70,7 +70,6 @@ VirtualDJ listens on `*:8080` (every interface, not just localhost), and `/query
 without the password and 200 with it. Profile: claude-kit `virtualdj`
 ([claude-kit#82](https://github.com/worthingtony/claude-kit/pull/82)); record: homelab
 `platform/credentials.md` ([homelab#96](https://github.com/worthingtony/homelab/pull/96)).
-Still owed: the item's notes line.
 
 ## Running the probe
 Not during a party. Automix **on and playing** a short list named `ZZZ CLAUDE test`, and
