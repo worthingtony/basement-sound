@@ -54,9 +54,13 @@ def query(script):
 def execute(script):
     return call("execute", script)
 
+def blank(v):
+    # VirtualDJ answers "error:-2147…" where there is nothing (empty deck, no next song)
+    return "" if v.startswith("error:") else v
+
 def song(prefix):
     # prefix is a verb taking a property name, e.g. "get_browsed_song"
-    return {p: query(f"{prefix} '{p}'") for p in ("artist", "title")}
+    return {p: blank(query(f"{prefix} '{p}'")) for p in ("artist", "title")}
 
 def label(s):
     return f"{s['artist']} - {s['title']}"
@@ -76,7 +80,7 @@ def alive():
 def show_read():
     print(f"Plugin at {BASE}: get_clock = {alive()!r}")
     for d in (1, 2):
-        print(f"Deck {d}: {query(f'deck {d} get_artist')!r} - {query(f'deck {d} get_title')!r}"
+        print(f"Deck {d}: {blank(query(f'deck {d} get_artist'))!r} - {blank(query(f'deck {d} get_title'))!r}"
               f"  is_audible={query(f'deck {d} is_audible')!r}")
     for k, v in automix_state().items():
         print(f"Automix {k}: {v!r}")

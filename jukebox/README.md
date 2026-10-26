@@ -1,7 +1,7 @@
 # Hands-off jukebox (VirtualDJ)
 
-**Status 2026-10-25:** design agreed, probe script written. **Not yet run against VirtualDJ** -
-it has only been exercised against a fake plugin. Nothing is built past the probe.
+**Status 2026-10-25:** design agreed. Network Control is on and the probe's `read` works against
+VirtualDJ on the MacBook. **`add` (the gating question) not yet run.** Nothing is built past the probe.
 
 ## Goal
 A TouchTunes-style jukebox for the basement: guests pick songs on a wall kiosk or their
@@ -24,8 +24,8 @@ GeniusDJ, LiveFeedback and the 2026 AIPrompt folder suggest songs but never queu
 ## Design
 - **VirtualDJ Automix does all playing and mixing.** It always holds a fallback playlist
   (shuffled, on repeat), so if the service dies the music keeps going.
-- **A small service on the MacBook** reads VirtualDJ's library (`database.xml` - location
-  on this Mac still to confirm), keeps the guest queue, and slots the next pick in with
+- **A small service on the MacBook** reads VirtualDJ's library (`database.xml` - on the MacBook it is
+  `~/Library/Application Support/VirtualDJ/database.xml`, not `~/Documents/VirtualDJ`), keeps the guest queue, and slots the next pick in with
   `automix_add_next` shortly before the current song ends. It talks to VirtualDJ through the
   **Network Control** plugin (Pro, VirtualDJ 2023+): HTTP `/query` and `/execute` running
   VDJScript, default port 8080, optional bearer password.
@@ -54,19 +54,23 @@ Plan B is the service loading songs onto the idle deck itself with `load "path"`
 then own the mixing, a much bigger build. Ask Tony before going that way.
 
 ## Setup (Tony, at the MacBook)
-- [ ] **1Password:** new item `virtualdj-claude` in the **Agents** vault, field `credential`,
+- [x] **1Password:** new item `virtualdj-claude` in the **Agents** vault, field `credential`,
       type Password, generated **letters and digits only** (the plugin's `?bearer=` URL form
       would need symbols encoded). Notes: *Used by: Claude's jukebox probe, later the jukebox
       service on the MacBook. Copies: VirtualDJ Network Control plugin settings on the MacBook.*
-- [ ] **VirtualDJ:** Config > Extensions > Effects > Other > **Network Control** > Install.
-- [ ] **Turn it on:** Master panel > effect slot > **Auto-Start** > Network Control. It doesn't
+- [x] **VirtualDJ:** Config > Extensions > Effects > Other > **Network Control** > Install.
+- [x] **Turn it on:** Master panel > effect slot > **Auto-Start** > Network Control. It doesn't
       listen until this is on.
-- [ ] **Cog wheel:** port 8080, password pasted from 1Password - never into chat.
-- [ ] If macOS asks whether VirtualDJ may accept incoming connections: **Allow**.
+- [x] **Cog wheel:** port 8080, password pasted from 1Password - never into chat.
+- [x] If macOS asks whether VirtualDJ may accept incoming connections: **Allow**.
 
-Once the item exists, check the reference resolves (length only, never the value), then run
-the `new-credential` skill: it creates the claude-kit `virtualdj` profile and updates the
-homelab credentials inventory.
+Done 2026-10-25. The Master panel steps were followed from the wiki's wording, not screenshots.
+Checked on the MacBook, values never printed: the item resolves (8 chars, letters and digits),
+VirtualDJ listens on `*:8080` (every interface, not just localhost), and `/query` answers 401
+without the password and 200 with it. Profile: claude-kit `virtualdj`
+([claude-kit#82](https://github.com/worthingtony/claude-kit/pull/82)); record: homelab
+`platform/credentials.md` ([homelab#96](https://github.com/worthingtony/homelab/pull/96)).
+Still owed: the item's notes line.
 
 ## Running the probe
 Not during a party. Automix **on and playing** a short list named `ZZZ CLAUDE test`, and
@@ -77,10 +81,16 @@ secret-run virtualdj -- python3 jukebox/vdj_probe.py read
 secret-run virtualdj -- python3 jukebox/vdj_probe.py add "artist title"
 ```
 
-Until the `virtualdj` profile exists, pass `secret-run` a scratch env file by path holding
-`VDJ_PASSWORD=op://Agents/virtualdj-claude/credential`. `add` leaves one song in the Automix
+Until claude-kit#82 merges, pass `secret-run` that PR's `profiles/virtualdj.env` by path.
+`add` leaves one song in the Automix
 list; Tony deletes it. Also note what Automix does when its list runs out (stops or waits),
 and whether `is_audible` answers - the TV page needs to know which deck is live.
+
+### First `read`, 2026-10-25
+Automix stopped, one song in its list. Deck 1 loaded, deck 2 empty, neither audible.
+- `is_audible` answers `yes`/`no` - good for the TV page.
+- Empty values (deck 2, Automix next) come back as `error:-2147…` strings, not blanks. The
+  probe now treats them as empty; the service will have to as well.
 
 ## Sources
 - [VDJScript verb list](https://virtualdj.com/manuals/virtualdj/appendix/vdjscriptverbs.html)
