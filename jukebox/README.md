@@ -115,7 +115,7 @@ Songs arrive at different loudness, and nobody will be riding the gain. Read fro
 | Setting | Now | Note |
 |---|---|---|
 | `autoGain` | `auto` | Per the options list: sets each song to 0 dBA on load, or keeps a manual gain change. Kept |
-| `automixAutoRemovePlayed` | `always` | Kept - the app tops the list up |
+| `automixAutoRemovePlayed` | `always` | Kept - the app tops the list up. Confirmed by Tony 2026-10-26: the app counts on the top row being the song playing, and VirtualDJ's History folder (`writeHistory`) already logs what played. Keeping played songs in the list would need the app to find the playing row first, and `automixRepeat` off |
 | `automixRepeat` | `yes` live | `settings.xml` said `no`, but VirtualDJ writes it only on quit - read live values with `setting '<name>'` through Network Control. Moot while remove-played is on |
 | `automixMaxLength` | `480` | Set 2026-10-25 with Tony's OK (was `0`, no cap), read back |
 | `automixMode` | `smart` | |
