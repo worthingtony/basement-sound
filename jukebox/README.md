@@ -382,6 +382,34 @@ wiki), so registering a script never runs it.
 | Mosquitto broker (HA app) | 7.1.2, running | **Used**, not overlapping: the app publishes its entities through it |
 | Mini Media Player (HACS card) | v1.16.12 | Could show now playing on the dashboard. No conflict |
 
+### Ideas from other jukeboxes and request apps (research, 2026-10-26)
+A web survey: TouchTunes, AMI, Rockbot, Soundtrack, Festify, Spotify Jam, SharePlay, Jukestar,
+WrzDJ, DJ Intelligence, VirtualDJ's Ask the DJ and karaoke, and DJCEL's MCP server. It was read
+from docs and source where possible; vendor copy is marked as such in the agent's report. Top 8
+to adopt, ranked:
+1. **Energy (BPM) curve by time of night** for autopilot: warm-up, peak, wind-down (TouchTunes/Rockbot schedules, WrzDJ templates).
+2. **Tie each name to a device** (cookie): typed first names make round-robin easy to game. **The kiosk is the hole:** a kiosk name matching a phone counts against that phone; unknown names get a kiosk-wide cap.
+3. **Shuffle pick:** the guest names an artist and the planner picks that artist's best-fitting track (Rockbot).
+4. **Artist-library mode:** open search auto-approves artists already in the curated list and asks only about the rest (Rockbot Smart Library). A third song-pool mode, with far fewer notifications.
+5. **Event mode:** one HA switch pauses guest picks for a toast or Tony's own set (AMI).
+6. **One-tap block** of a song or an artist, from the now-playing notification.
+7. **Position and wait on the phone** ("#3, about 10 min"), and **recently played plus picker names** on the TV.
+8. **Artist spacing:** no artist again within N songs.
+
+Also worth weighing:
+- **Refilling credits** (Jukestar) in place of a hard cap, spendable on a play-next bump, refunded when a pick is denied.
+- **Dedications** shown on the TV.
+- **"I'm leaving" removes my picks** (`filedelete` makes that possible).
+- **A curated list of several hundred songs:** 15-20 an hour plus no repeats will exhaust a small list. `party` has 102.
+- **Explicit flags are unreliable** across services. If we filter, decide whether the filter covers autopilot.
+- **Check VirtualDJ's `automixTempoMode`:** "keep BPM" pitches up to ±10%, which interacts with the planner. Not checked.
+
+Correction to the report: it says the ±6% tempo rule doesn't handle half and double time. `flow.tempo_score`
+does (87 vs 174 BPM scores as a match). Not worth adopting: crowd voting on order (fights turns and flow),
+tips, karaoke night, Ask the DJ (needs the internet, 100 requests, no per-user limits).
+WrzDJ (MIT) has recommendation scoring worth reading before the guest step. Its AI assist calls an LLM,
+so check which model before borrowing anything there.
+
 ### Improvements not yet decided
 - **MacBook on Ethernet** and **Offline Cache** for the curated and fallback songs, so a Wi-Fi or
   internet blip isn't silence. (The MacBook also has an interface on the IoT VLAN 1921 as its
