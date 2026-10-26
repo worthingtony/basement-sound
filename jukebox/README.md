@@ -103,7 +103,23 @@ put Claude VonStroke - Deep Throat next in Automix while it played (list 3 -> 4,
   Beatport results; the one selected was `netsearch://bp48803`. The service should check
   `get_browsed_filepath` against the guest's pick before adding, and decide whether guests
   may get streaming tracks (they need the connection and subscription up during a party).
-- Not tested yet: how Automix mixes the added song in, and what happens when the list runs out.
+- Automix mixed the added song in fine, by Tony's ear. Not tested yet: what happens when the
+  list runs out.
+
+### Volume levelling - to do
+Songs arrive at different loudness, and nobody will be riding the gain. Read from
+`settings.xml` on the MacBook, 2026-10-25 (nothing changed):
+
+| Setting | Now | Note |
+|---|---|---|
+| `autoGain` | `auto` | What `auto` does versus `yes` still to look up |
+| `automixRepeat` | `no` | The design needs the fallback list on repeat |
+| `automixMaxLength` | `0` | No cap yet - the design wants one |
+| `automixMode` | `smart` | |
+| `writeHistory` | `yes` | ✅ |
+
+Later layers, if autogain isn't enough: a VirtualDJ master limiter, then the DriveRack - the
+mains limiter (`Limiter1`) is Off in preset #37 (see Design). No DriveRack change without Tony's OK.
 
 ## Sources
 - [VDJScript verb list](https://virtualdj.com/manuals/virtualdj/appendix/vdjscriptverbs.html)
