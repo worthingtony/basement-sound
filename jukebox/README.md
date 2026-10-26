@@ -134,7 +134,7 @@ mains limiter (`Limiter1`) is Off in preset #37 (see Design). No DriveRack chang
 | Turns | **First name on first pick.** Phones remember it (cookie); the kiosk asks every time. Round-robin across names. |
 | Where it runs | **An HA app on the Pi 5** (172.16.0.138). Nothing of ours runs on the MacBook - it only runs VirtualDJ. |
 | Who reaches it | **Internal only, no public URL.** Guests join the guest Wi-Fi. A separate LXC for the request page is a later option, not v1. |
-| Engine | **VirtualDJ (option A), not Music Assistant** - keep beatmatched Automix; all browser-steering hidden in one "add exact song" function. Every route into VirtualDJ checked 2026-10-25 shares the select-then-act model: Network Control, VirtualDJ Remote (skins run VDJScript), DJCEL's VirtualDJ-API-Python and VirtualDJ-MCP-Server (both thin wrappers over Network Control, GPL-3.0, must run on the MacBook). |
+| Engine | **VirtualDJ (option A), not Music Assistant** - keep beatmatched Automix, driven by **posing as a VirtualDJ Remote** (add by path, proven 2026-10-25); Network Control as fallback. Every route into VirtualDJ checked 2026-10-25 shares the select-then-act model: Network Control, VirtualDJ Remote (skins run VDJScript), DJCEL's VirtualDJ-API-Python and VirtualDJ-MCP-Server (both thin wrappers over Network Control, GPL-3.0, must run on the MacBook). |
 | Remote protocol | **Tony is OK reverse-engineering the VirtualDJ Remote phone app** - a time-boxed side quest, not on the build's critical path. See below. |
 
 ### Shape - one HA app, three faces
@@ -171,7 +171,7 @@ TV (house LAN) ----------------------------------------> /tv           /
 - **Limits:** per-name cap on queued songs, and nothing a guest types reaches VDJScript - guests pick
   from the catalogue, and the app sends only that entry's own search terms.
 
-### Adding a song - no screen control, but the browser is in the loop
+### Adding a song - SUPERSEDED 2026-10-25 by the fake remote (below); kept as the Network Control fallback
 Everything goes through Network Control's HTTP API. But **no VDJScript verb adds a given file to
 Automix**: `automix_add_next`, `playlist_add` and `sidelist_add` add only the browser's selection.
 Tested 2026-10-25: `automix_add_next "<file path>"` answered **HTTP 404 and added nothing**. Only
@@ -295,6 +295,23 @@ Remote accept list.
   `vdjRemoteDevices` = `Tonys iPhone`, `iRemoteDefaultPort` = 4243. A fake remote advertises its own
   name and Tony accepts it once. Name-based, so anything on VLAN 1 could claim an accepted name -
   acceptable on the house LAN, worth knowing.
+
+**Proven end to end 2026-10-25 - `jukebox/vdj_remote_probe.py`.** The probe advertised
+`ZZZ CLAUDE jukebox` (`dns-sd -R … _vdjremote8._tcp local. 4250`, built into macOS) and listened on
+4250. Tony accepted it in VirtualDJ's Remote settings; VirtualDJ connected. Then, with no browser
+steering at all:
+- **Catalogue by path:** type 36 `mylists:/ZZZ CLAUDE test.subfolders` -> type 37 XML, all 3 songs.
+- **Automix list by path:** type 36 `playlist` -> type 37, all songs with their paths.
+- **Add by path:** type 50 `<filedrop path="netsearch://ap6765480962" … position="2"/>` -> Mr. V -
+  Jus Dance landed at **exactly index 2**; Network Control agreed (count 6 -> 7).
+- Type 37 replies are plain XML (`uint16 flag, uint32 1, XML`) or, when larger, **a zip holding
+  `data.xml`** (`uint32 2`).
+- The probe opens with only the type 39 hello; VirtualDJ then sends deck state (43), settings (54)
+  and 59 unasked.
+
+**So the app is a fake remote:** catalogue and Automix list read by path, picks dropped at an exact
+position, now-playing from the deck-state messages (to decode). Network Control stays as a fallback
+and for settings. The favorites trick and search-and-match are no longer needed.
 
 ### Already installed that overlaps (checked 2026-10-25)
 | What | Version | Overlap |
