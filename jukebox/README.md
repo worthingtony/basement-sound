@@ -130,8 +130,10 @@ mains limiter (`Limiter1`) is Off in preset #37 (see Design). No DriveRack chang
 | Question | Answer |
 |---|---|
 | Queue | **The service tops up Automix.** Remove-played stays on; the service keeps Automix 2-3 songs ahead (next guest pick by turn, else a fallback pick) plus ~10 fallback songs at the end as runway, so if the service dies the music plays on for ~40 min. |
-| Song pool | **One curated VirtualDJ playlist, streams allowed.** 383 of the 442 library entries are streams (`netsearch://`), so a night needs the internet and the subscription up (Offline Cache would remove that - see Improvements). |
+| Song pool | **Two modes, switched per party on the admin face (Tony, 2026-10-25): Curated** - one VirtualDJ playlist Tony curates in VirtualDJ (the default); **Open + approve** - guests search everything VirtualDJ can search, and each pick reaches Tony as an HA notification with Approve / Deny; nothing plays until he taps. Optional filters on top (genres, a BPM band, a block list, sources). Streams allowed, so a night needs the internet. |
 | Turns | **First name on first pick.** Phones remember it (cookie); the kiosk asks every time. Round-robin across names. |
+| Name | **"Studio 841 Jukebox"** - the name VirtualDJ shows on its Remote accept list (Tony, 2026-10-25). |
+| Plugin instead? | **No** (reviewed 2026-10-25): a VirtualDJ plugin's API is `SendCommand`/`GetInfo` - VDJScript, the same select-then-act limit - and a crash would take VirtualDJ down mid-party. Portability isn't a goal. |
 | Where it runs | **An HA app on the Pi 5** (172.16.0.138). Nothing of ours runs on the MacBook - it only runs VirtualDJ. |
 | Who reaches it | **Internal only, no public URL.** Guests join the guest Wi-Fi. A separate LXC for the request page is a later option, not v1. |
 | Engine | **VirtualDJ (option A), not Music Assistant** - keep beatmatched Automix, driven by **posing as a VirtualDJ Remote** (add by path, proven 2026-10-25); Network Control as fallback. Every route into VirtualDJ checked 2026-10-25 shares the select-then-act model: Network Control, VirtualDJ Remote (skins run VDJScript), DJCEL's VirtualDJ-API-Python and VirtualDJ-MCP-Server (both thin wrappers over Network Control, GPL-3.0, must run on the MacBook). |
@@ -334,6 +336,15 @@ stored reversed (`bool` uint32, `val` float32, `txt` uint32 length + UTF-8, `fai
   jukebox.app.test_vdjremote`), no library paths in them.
 - Verified live from the MacBook (temporary - it runs only while a command runs): folder by path,
   Automix list, add at an exact position (earlier probe), now playing.
+
+**Search, checked 2026-10-25.** Type 36 `search://<term>` searches everything VirtualDJ can: for
+`daft punk`, 402 results in three waves over ~2 s (0 -> 26 -> 127 -> 402, then an
+`<updatedfolders>` notice) - 3 files, 25 `ap…` (Apple Music, by its separator), 100 `bp…` (Beatport),
+274 `va…` (not identified - maybe VirtualDJ's video/karaoke catalogue). Results interleave
+`separator://<Source>` headers and carry artist, title, genre and tempo. **Tempo in folder XML is
+seconds per beat** (0.488 = 123 BPM). `folder()` now waits for the waves to settle and drops separators.
+Registered queries are VDJScript in *query* context ("used as a LED mapping, it's a query" - VDJScript
+wiki), so registering a script never runs it.
 
 ### Already installed that overlaps (checked 2026-10-25)
 | What | Version | Overlap |

@@ -44,6 +44,13 @@ class Codec(unittest.TestCase):
             self.assertEqual(v.xml_files(x), [{"path": "netsearch://ap1", "artist": "A & B",
                                                "title": "Sippin' Yak", "bpm": "0.47"}])
 
+    def test_songs_drop_separators_and_bpm_converts(self):
+        files = [{"path": "separator://AppleMusic"}, {"path": "netsearch://ap697195462", "bpm": "0.488290"},
+                 {"path": "netsearch://bp1", "bpm": "0.0"}]
+        self.assertEqual([f["path"] for f in v.songs(files)], ["netsearch://ap697195462", "netsearch://bp1"])
+        self.assertEqual(v.bpm(files[1]), 122.9)
+        self.assertIsNone(v.bpm(files[2]))
+
     def test_filedrop_escapes_and_positions(self):
         body = v.filedrop_body({"path": "netsearch://ap1", "artist": "A & B", "title": "Sippin' Yak"}, 2)
         self.assertEqual(body[:6], struct.pack("<HI", 0, 1))

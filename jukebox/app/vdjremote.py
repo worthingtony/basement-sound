@@ -91,6 +91,17 @@ def xml_files(xml):
             for m in re.findall(r"<file (.*?)/?>", xml)]
 
 
+def songs(files):
+    """Drop source headers such as separator://AppleMusic that searches interleave."""
+    return [f for f in files if not f.get("path", "").startswith("separator://")]
+
+
+def bpm(song):
+    """Folder XML stores tempo as seconds per beat (0.488 = 123 BPM); 0 when not analysed."""
+    spb = float(song.get("bpm") or 0)
+    return round(60 / spb, 1) if spb > 0 else None
+
+
 def folder_path(xml):
     m = re.search(r'<folder(?:content|children) path="([^"]*)"', xml)
     return html.unescape(m.group(1)) if m else None
@@ -216,14 +227,18 @@ class VdjRemote:
         self._wait(lambda: qid in self.values, timeout)
         return self.values.get(qid)
 
-    def folder(self, path, timeout=5):
-        """Songs in a folder or search (e.g. 'search://claude'), as a list of attribute dicts."""
+    def folder(self, path, timeout=5, settle=1.0):
+        """Songs in a folder or search (e.g. 'search://claude'), as a list of attribute dicts.
+        Searches fill in waves as online sources answer (0 -> 26 -> 127 -> 402 over ~2 s on
+        2026-10-25), so wait until no update has come for `settle` seconds."""
         asked = time.time()
         self._send(T_FOLDER_REQ, struct.pack("<H", 1) + path.encode())
-        ok = self._wait(lambda: self.folders.get(path, (0,))[0] >= asked, timeout)
-        if not ok:
+        if not self._wait(lambda: self.folders.get(path, (0,))[0] >= asked, timeout):
             raise TimeoutError(f"no listing for {path!r}")
-        return xml_files(self.folders[path][1])
+        end = asked + timeout
+        while time.time() < end and time.time() - self.folders[path][0] < settle:
+            time.sleep(0.1)
+        return songs(xml_files(self.folders[path][1]))
 
     def automix(self):
         return self.folder(AUTOMIX)
