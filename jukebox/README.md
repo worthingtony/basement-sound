@@ -332,7 +332,18 @@ stored reversed (`bool` uint32, `val` float32, `txt` uint32 length + UTF-8, `fai
 app store can install it - Tony, 2026-10-25). Version 0.1.0 ([PR #1](https://github.com/worthingtony/studio841-jukebox/pull/1)):
 the protocol client (moved from `jukebox/app/` here), flow scoring (tempo + Camelot key), the
 round-robin + flow planner, the service with an ingress status page, and autopilot (off by default).
-15 unit tests; ran read-only from the MacBook; not yet on the Pi.
+15 unit tests; ran read-only from the MacBook.
+
+**On the Pi, 2026-10-26.** Installed from the HA app store (repo added, built on the Pi from the
+Dockerfile, slug `40cbc136_studio841_jukebox`) and started. Verified:
+- the zeroconf advert: the Mac's `dns-sd` saw "Studio 841 Jukebox" and resolved it to `172.16.0.138:4250`;
+- after Tony accepted it in VirtualDJ, VirtualDJ connected from `172.16.0.70` within seconds;
+- `api/status` through ingress (the Supervisor proxy) showed deck 1 Cloonee - Sippin' Yak at 118 BPM,
+  the 7-song Automix list, the 3-song test catalogue, and no error;
+- the status port refuses anything but the ingress proxy (403 from the SSH app's container).
+
+Seen in that Automix list: songs that came in as text (`search://Artist/Title/Remix`) carry no tempo or
+key until VirtualDJ resolves them to a stream, so flow scores them neutral (0.5).
 
 **Search, checked 2026-10-25.** Type 36 `search://<term>` searches everything VirtualDJ can: for
 `daft punk`, 402 results in three waves over ~2 s (0 -> 26 -> 127 -> 402, then an
@@ -360,11 +371,11 @@ wiki), so registering a script never runs it.
 ### Infra (homelab `jukebox/`)
 - Firewall: **guest VLAN 1922 -> Pi, request port only.** App -> MacBook :8080 is VLAN 1 to VLAN 1:
   no rule (verified: 401 from HA in 0.09 s).
-- DHCP reservation for the MacBook so the app finds VirtualDJ.
+- ~~DHCP reservation for the MacBook~~ - not needed (2026-10-26): VirtualDJ finds the app by Bonjour and dials in; the app never addresses the MacBook.
 
 ### Build order
 0. ~~Probe: list the playlist~~ done 2026-10-25 (above). Still to prove: exact-match add of a search hit that isn't the top result.
-1. ~~App skeleton~~ - done 2026-10-25: studio841-jukebox 0.1.0. Still to do: install on the Pi and accept it in VirtualDJ.
+1. ~~App skeleton~~ - done 2026-10-25: studio841-jukebox 0.1.0; on the Pi and connected 2026-10-26.
 2. Queue + top-up loop + fallback runway **with flow ordering** (tempo, Camelot key, 2-slot fairness limit - Tony, 2026-10-25); planner and autopilot are in 0.1.0, a night with no guests still to run.
 3. Admin face: ingress page + MQTT entities + health alert.
 4. Request and TV faces on the house LAN (kiosk first).
