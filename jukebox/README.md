@@ -418,8 +418,10 @@ so check which model before borrowing anything there.
 - **Request page in its own LXC** later, so guest Wi-Fi never reaches the Pi.
 
 ### Infra (homelab `jukebox/`)
-- Firewall: **guest VLAN 1922 -> Pi, request port only.** App -> MacBook :8080 is VLAN 1 to VLAN 1:
-  no rule (verified: 401 from HA in 0.09 s).
+- Firewall: **guest VLAN 1922 -> Pi, request port only** ([homelab#98](https://github.com/worthingtony/homelab/issues/98)).
+  The app never calls the MacBook's :8080: VirtualDJ dials in to the app (2026-10-26). The 401 from HA
+  in 0.09 s (2026-10-25) now matters for a different reason. It shows :8080 admits other hosts, and
+  the MacBook's wired leg is on IoT 1921 (homelab `jukebox/README.md`).
 - ~~DHCP reservation for the MacBook~~ - not needed (2026-10-26): VirtualDJ finds the app by Bonjour and dials in; the app never addresses the MacBook.
 
 ### Build order
