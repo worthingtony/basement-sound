@@ -119,6 +119,7 @@ Songs arrive at different loudness, and nobody will be riding the gain. Read fro
 | `automixRepeat` | `yes` live | `settings.xml` said `no`, but VirtualDJ writes it only on quit - read live values with `setting '<name>'` through Network Control. Moot while remove-played is on |
 | `automixMaxLength` | `480` | Set 2026-10-25 with Tony's OK (was `0`, no cap), read back |
 | `automixMode` | `smart` | |
+| `automixDualDeck` | `yes` | Set by Tony 2026-10-26 (was `no`, single-deck Automix). The aim: smoother levels at transitions. Read back live, `setting 'automixDualDeck'` = `yes`, with the next song preloaded on deck 2. The planner's `start` must then be 2 when the next song is already loaded |
 | `writeHistory` | `yes` | ✅ |
 
 Later layers, if autogain isn't enough: a VirtualDJ master limiter, then the DriveRack - the
