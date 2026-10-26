@@ -238,6 +238,20 @@ Recon, in order, stopping at the first dead end:
 
 My expectation: the Remote sends the same VDJScript, so no new capability - but cheap to check.
 
+**Recon 2026-10-25 - the iOS Remote installed on the MacBook** (`/Applications/VirtualDJ Remote.app`,
+`com.atomixproductions.VirtualDJRemote` 9.0.9618). Its code is FairPlay-encrypted (`cryptid 1`) and was
+not decrypted. Read-only, from the unencrypted parts:
+- **Its skin (`skin.zip`) drives everything with plain VDJScript**: `browser_scroll +1/-1`,
+  `deck left load`, `automix`. The song list is a built-in `<browser>` widget.
+- **The binary carries VirtualDJ's whole VDJScript verb table** (`automix_add_next`,
+  `browser_gotofolder`, `playlist_add`, `sidelist_add`, ... in sequence) plus SQLCipher and OpenSSL -
+  it is the VirtualDJ engine reshaped as a remote, so its link to VirtualDJ almost certainly carries
+  VDJScript, likely encrypted.
+- **No add-by-path verb exists in VDJScript**, so the Remote can't have one either - unless its
+  `<browser>` widget uses a private message, which only watching a paired session would show.
+(The Android APK route was dropped: the Remote is a paid app, APKMirror doesn't carry it, and other
+mirrors would be unpaid copies. `jadx` was installed by Homebrew for it.)
+
 ### Already installed that overlaps (checked 2026-10-25)
 | What | Version | Overlap |
 |---|---|---|
