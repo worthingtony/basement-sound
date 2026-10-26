@@ -313,6 +313,28 @@ steering at all:
 position, now-playing from the deck-state messages (to decode). Network Control stays as a fallback
 and for settings. The favorites trick and search-and-match are no longer needed.
 
+**Now playing, decoded 2026-10-25.** Live state is *pushed*: the Remote registers VDJScript queries
+(type 1: uint16 id, 4-byte deck tag stored reversed or zeros, script; then type 3 `uint16 2, uint32 id`
+to subscribe) and VirtualDJ sends type 5 every time a value changes: uint16 id, a 4-byte type tag
+stored reversed (`bool` uint32, `val` float32, `txt` uint32 length + UTF-8, `fail` = no value).
+- **VirtualDJ numbers registrations from 0 in the order they arrive**, whatever id is sent.
+- Through the Remote, `get_title` answers a yes/no and `get_time` answers nothing; use
+  `get_title_before_remix` (what the real Remote uses), `get_artist`, `get_filepath`, `get_bpm`,
+  `loaded`, `is_audible`, and `song_pos` (0..1) times the song's length.
+- Checked live: deck 1 audible, Cloonee - Sippin' Yak, 118 BPM; deck 2 empty.
+- VirtualDJ also pushes, unasked: deck-state blocks (43), skin settings (54), the loaded song as XML
+  (55), cues (40), beatgrid (67), waveform (42) and cover art (44, JPEG) - the TV page can use the art.
+
+**Build step 1 - done 2026-10-25: `jukebox/app/`.**
+- `vdjremote.py` - the protocol: framing, query registration and pushed values, folders by path
+  (plain or zipped), `add_to_automix(song, position)` with read-back. Standard library only; the
+  Bonjour advert is macOS `dns-sd` for now - the HA app needs its own (zeroconf, in its image).
+- `cli.py` - `python3 -m jukebox.app.cli nowplaying | folder PATH | automix | add CATALOGUE PATH POS`.
+- `test_vdjremote.py` - 6 unit tests from bytes seen on the wire (`python3 -m unittest
+  jukebox.app.test_vdjremote`), no library paths in them.
+- Verified live from the MacBook (temporary - it runs only while a command runs): folder by path,
+  Automix list, add at an exact position (earlier probe), now playing.
+
 ### Already installed that overlaps (checked 2026-10-25)
 | What | Version | Overlap |
 |---|---|---|
@@ -334,7 +356,7 @@ and for settings. The favorites trick and search-and-match are no longer needed.
 
 ### Build order
 0. ~~Probe: list the playlist~~ done 2026-10-25 (above). Still to prove: exact-match add of a search hit that isn't the top result.
-1. App skeleton: VirtualDJ client, catalogue, exact add - run from HA against VirtualDJ.
+1. ~~App skeleton: VirtualDJ client, catalogue, exact add~~ - done 2026-10-25 on the Remote protocol (`jukebox/app/`); still to run from HA.
 2. Queue + top-up loop + fallback runway; a night with no guests.
 3. Admin face: ingress page + MQTT entities + health alert.
 4. Request and TV faces on the house LAN (kiosk first).
