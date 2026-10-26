@@ -345,6 +345,27 @@ Dockerfile, slug `40cbc136_studio841_jukebox`) and started. Verified:
 Seen in that Automix list: songs that came in as text (`search://Artist/Title/Remix`) carry no tempo or
 key until VirtualDJ resolves them to a stream, so flow scores them neutral (0.5).
 
+**The first hang, and 0.1.1 (2026-10-26).** At 08:21 one Automix read went unanswered. 0.1.0 treated
+that as a lost connection and went back to waiting, but VirtualDJ still held the old one (`netstat` on
+the Mac: ESTABLISHED, no traffic). Linux gave up on the socket after 15m51s (its retransmit limit), and
+VirtualDJ didn't dial again until it next had something to send, an hour later. 0.1.1
+([PR #2](https://github.com/worthingtony/studio841-jukebox/pull/2)) rides out failed ticks, drops the
+connection itself after 5 in a row, and sets TCP keepalive. Cause not proven: it happened while a second
+test remote (the Mac probe) was connected on the **same port number, 4250**. Since then the probe uses
+4251, and the two ran side by side five times without trouble. After the update VirtualDJ reconnected
+within a second: it dials again when the app closes cleanly.
+
+**Removing a song: `<filedelete>` (2026-10-26).** The Remote app's binary names `filedelete` and `filemove`
+(with `source_position`) beside `filedrop`. `<folderupdate path="playlist"><filedelete path=... position="N"/>`
+took the two test songs (Duice, Mr. V) out of Automix, read back each time. The same message to a My Lists
+playlist did nothing, so the extra Duice is still in "ZZZ CLAUDE test". `filemove` is untested.
+
+**Song sources VirtualDJ lists** (children of `onlinemusic:`): CloudDrive, iDJPool, VJ'Pro, Digitrax,
+Spotify, Apple Music, SoundCloud, Beatport, Offline Cache. Apple Music shows Playlists / Albums / Songs /
+For You / Recently Added / Recently Played. Asking for Apple Music Playlists returned nothing within 10 s,
+so it isn't proven. My Lists holds `party` (2 songs) and `ZZZ CLAUDE test` (3). The curated pool for the
+autopilot test is **`party`**, which Tony is filling (2026-10-26).
+
 **Search, checked 2026-10-25.** Type 36 `search://<term>` searches everything VirtualDJ can: for
 `daft punk`, 402 results in three waves over ~2 s (0 -> 26 -> 127 -> 402, then an
 `<updatedfolders>` notice) - 3 files, 25 `ap…` (Apple Music, by its separator), 100 `bp…` (Beatport),
@@ -375,7 +396,7 @@ wiki), so registering a script never runs it.
 
 ### Build order
 0. ~~Probe: list the playlist~~ done 2026-10-25 (above). Still to prove: exact-match add of a search hit that isn't the top result.
-1. ~~App skeleton~~ - done 2026-10-25: studio841-jukebox 0.1.0; on the Pi and connected 2026-10-26.
+1. ~~App skeleton~~ - done 2026-10-25: studio841-jukebox 0.1.0; on the Pi and connected 2026-10-26; 0.1.1 hardening the same day.
 2. Queue + top-up loop + fallback runway **with flow ordering** (tempo, Camelot key, 2-slot fairness limit - Tony, 2026-10-25); planner and autopilot are in 0.1.0, a night with no guests still to run.
 3. Admin face: ingress page + MQTT entities + health alert.
 4. Request and TV faces on the house LAN (kiosk first).
