@@ -42,6 +42,12 @@ Tony's basement DJ system (separate from the upstairs home theater). Goal: sound
 5. Placement, then room treatment, then hardware only if measurements show it's the limit.
 6. Optional: rewire so tops, F1 subs and QSC each get their own DriveRack output.
 
+## Wishlist (gear to buy)
+- Tracked as **issues labelled `wishlist`** ([open list](https://github.com/worthingtony/basement-sound/issues?q=is%3Aopen+label%3Awishlist)), one per item: what, price with source and date, why, what it unblocks, done when. Dependencies are GitHub *blocked by* links (e.g. #9 and #10 wait on #6).
+- Not on the Now board: it has one Parked pointer card, "Basement wishlist (gear to buy)". When Tony is buying an item, add that issue to Now as Waiting on Tony.
+- Close an issue when the item is **installed and working**, not when it's ordered.
+- This repo is public - no VLAN IDs, serials or other house network detail in these issues.
+
 ## Files here
 - `venu360_xover_ab.py` - `A` / `B` (QSC crossover 102 Hz/Out vs Out/Out), `normal` / `invert` (QSC polarity), `status`. Read-back verified; B auto-reverts to A on failure. Note: preset 37 already has B + Inverted.
 - `venu360_backup.py` - read-only full dump to `backups/`, optional `--diff`. Writes the admin password and MAC fields as `<redacted>` and `--diff` skips them, because the repo is public; the committed backups are redacted the same way.
