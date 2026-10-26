@@ -200,9 +200,23 @@ With VirtualDJ's browser on the `ZZZ CLAUDE test` playlist (Tony opened it), `br
 Properties: `bpm`, `key`, `length` (`03:21` form) work; `songlength` and `duration` don't. Nothing
 was added (Automix count 4 before and after).
 
-**Catch:** since the app can't open a folder, it can only read the catalogue while the browser is
-already showing the playlist. So the catalogue is read **at party start**: Tony opens the playlist in
-VirtualDJ and presses "load catalogue" on the admin face; the app keeps it. Adding then uses search.
+**Opening the playlist without the screen - found 2026-10-25.** Paths and favorite numbers don't
+work through the plugin, but the folder tree can be stepped like VirtualDJ Remote does (its skins send
+the same VDJScript):
+
+| Try | Result |
+|---|---|
+| `browser_gotofolder "<path>"` (any form) | 404, no move |
+| `browser_gotofolder 1` / `3` / `4` (favorite by number) | `false`, no move |
+| Walk the tree from `top` with `browser_scroll +1` | ✅ reached the playlist in 59 steps - **but unsafe**: it steps through the online Beatport Charts folders, each loading from the internet, and the plugin stopped answering for several seconds. Never during a party |
+| **Make the playlist the *last* favorite folder, then `browser_window 'folders'` + `browser_scroll 'bottom'`** | ✅ lands on `mylists:/ZZZ CLAUDE test.subfolders`, 3 files, in one step. Then `browser_window 'songs'`, `browser_scroll 'top'` and read |
+
+So the app opens the catalogue itself: **folders, bottom, check `get_browsed_folder_path` is the
+expected playlist** (refuse if not), then read. Rule for Tony: **the jukebox playlist stays the last
+favorite** (`Folders/order` lists favorites in order; the playlist is last as of 2026-10-25).
+The same move gets the browser back after anyone has clicked around.
+
+(During the walk test the music was stopped - Tony had paused it; not caused by the probe.)
 
 ### Already installed that overlaps (checked 2026-10-25)
 | What | Version | Overlap |
