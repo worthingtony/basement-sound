@@ -81,7 +81,7 @@ secret-run virtualdj -- python3 jukebox/vdj_probe.py read
 secret-run virtualdj -- python3 jukebox/vdj_probe.py add "artist title"
 ```
 
-Until claude-kit#82 merges, pass `secret-run` that PR's `profiles/virtualdj.env` by path.
+claude-kit#82 merged 2026-10-25, so `secret-run virtualdj` works by name.
 `add` leaves one song in the Automix
 list; Tony deletes it. Also note what Automix does when its list runs out (stops or waits),
 and whether `is_audible` answers - the TV page needs to know which deck is live.
