@@ -252,6 +252,34 @@ not decrypted. Read-only, from the unencrypted parts:
 (The Android APK route was dropped: the Remote is a paid app, APKMirror doesn't carry it, and other
 mirrors would be unpaid copies. `jadx` was installed by Homebrew for it.)
 
+**Breakthrough 2026-10-25 - the Remote protocol is plain text and HAS add-by-path.** With the iOS
+Remote running on the MacBook and paired, `tcpdump` on `lo0` (no sudo - Wireshark's ChmodBPF gives
+`access_bpf`) recorded a session while Tony browsed, searched and added a song.
+- **Discovery:** the *Remote* advertises Bonjour `_vdjremote8._tcp` and **listens on TCP 4243**;
+  **VirtualDJ connects to it** (LAN, not via VirtualDJ's servers). Only devices on VirtualDJ's
+  accept list are used.
+- **Framing:** every message is `"8JDV"` + uint32 LE total length + uint16 LE type + body.
+- **Message types seen, Remote -> VirtualDJ:**
+
+| Type | Body | Meaning |
+|---|---|---|
+| 1 | uint16 id, uint32, VDJScript text (`automix`, `deck left play_pause`) | register a VDJScript query/button under an id |
+| 2 / 3 | id + value | press / update a registered id |
+| 36 | uint16 flag, **folder path** (`mylists:/ZZZ CLAUDE test.subfolders`, `search://<term>`, `applemusic:`) | **list any folder or run a search by path** |
+| 47 | flags, uint32 length, **song path** (`netsearch://…`, `search://…`, file path) | per-song info / artwork request |
+| 49 | uint16, **VDJScript text with a path**: `mix_now "search://Cloonee/…"` | run a script |
+| 50 | uint32, XML `<folderupdate path="playlist"><filedrop path="netsearch://ap6765480964" artist="Duice" title="The Pawee" … position="5"/></folderupdate>` | **add a song by path to the Automix list at a position** |
+
+- VirtualDJ -> Remote (2.6 MB in ~2 min): state, folder listings and artwork - not yet decoded.
+- The Automix list went from 4 to 6 songs during the session; Duice - The Pawee was added.
+
+**What it means:** the jukebox app can **act as a VirtualDJ Remote** - advertise `_vdjremote8._tcp`
+on VLAN 1, let VirtualDJ connect, and use type 36 (catalogue and search by path) and type 50
+(add by path, at a position). **No browser steering at all.** Network Control stays as a fallback.
+Risks: undocumented, could change with a VirtualDJ update; Tony accepts the app once in VirtualDJ's
+Remote accept list. **Next:** record the handshake (the session above was already open) - Tony quits
+and reopens the Remote during a capture.
+
 ### Already installed that overlaps (checked 2026-10-25)
 | What | Version | Overlap |
 |---|---|---|
