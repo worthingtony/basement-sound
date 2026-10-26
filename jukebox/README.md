@@ -121,6 +121,62 @@ Songs arrive at different loudness, and nobody will be riding the gain. Read fro
 Later layers, if autogain isn't enough: a VirtualDJ master limiter, then the DriveRack - the
 mains limiter (`Limiter1`) is Off in preset #37 (see Design). No DriveRack change without Tony's OK.
 
+## Service plan (draft 2026-10-25 - for Tony to agree)
+
+### Decided (Tony, 2026-10-25)
+| Question | Answer |
+|---|---|
+| Queue | **The service tops up Automix.** Remove-played stays on; the service keeps Automix 2-3 songs ahead (next guest pick by turn, else a fallback pick) plus ~10 fallback songs at the end as runway, so if the service dies the music plays on for ~40 min. |
+| Song pool | **One curated VirtualDJ playlist, streams allowed.** 383 of the 442 library entries are streams (`netsearch://`), so a night needs the internet and the subscription up. |
+| Turns | **First name on first pick.** Phones remember it (cookie); the kiosk asks every time. Round-robin across names. |
+| Phones | **Mobile data, not Wi-Fi: a public URL on worthingtony.com**, QR on the TV. Infra documented in a homelab folder. |
+
+### Shape
+```
+phone (mobile data) --https--> Cloudflare --tunnel--> cloudflared LXC (172.31.0.152)
+                                                         |
+iPad kiosk, TV (house LAN) ----------------------------> jukebox service (MacBook, :8765)
+                                                         |  localhost only
+                                                         v
+                                              VirtualDJ Network Control (:8080)
+```
+- **Service:** Python on the MacBook, standard library only (like the rest of this repo, nothing to
+  install). Holds the queue and guest names in memory plus a small JSON file so a restart keeps them.
+- **Catalogue:** the curated playlist's songs, read from VirtualDJ (`database.xml` plus the playlist
+  file in `MyLists`), with artist, title, BPM, key and file path. Guests search only this.
+- **Adding a song:** `search "<artist> <title>"`, `browser_window 'songs'`, check
+  `get_browsed_filepath` is the guest's pick (step down the results with `browser_scroll` if not),
+  then `automix_add_next`, read back. One add at a time.
+- **Pages:** guest (search, pick, see your place in line), kiosk (same, asks the name each time),
+  TV (now playing, up next with names, QR). The TV updates with server-sent events.
+- **Volume:** `autoGain` stays on; see Volume levelling.
+
+### Public exposure - the part that needs care
+- **Only the guest pages and their API go through the tunnel.** Network Control (`:8080`) stays
+  off the tunnel; the plugin listens on every interface, so the service should be the only thing
+  the tunnel can reach.
+- **Party code.** The QR carries a code that changes each party; picks without it are refused, and
+  outside party mode the service answers nothing but a closed page. Someone who kept the URL can't
+  queue songs next week.
+- **Limits:** per-name cap on queued songs, a Cloudflare rate-limit rule on the pick endpoint
+  (Free plan allows it - see homelab `network/tunnel.md`), and no free text reaches VDJScript
+  except artist and title from our own catalogue.
+- **No Cloudflare Access** - guests have no login. The party code is the boundary.
+
+### Infra (homelab, separate PR)
+- New tunnel hostname (proposed `jukebox.worthingtony.com`) in the remotely managed tunnel, pointing
+  at the MacBook.
+- The MacBook needs a fixed address (DHCP reservation) and a firewall rule letting the cloudflared
+  LXC (VLAN 1731) reach port 8765 on it (VLAN 1). Nothing else.
+- When the MacBook is away or asleep the hostname just fails - acceptable.
+
+### Build order
+1. Catalogue reader + `add` by file path (CLI), proven against VirtualDJ.
+2. Queue + top-up loop + fallback runway; run a night with no guests.
+3. Kiosk and TV pages on the LAN.
+4. Party code, limits, then the tunnel hostname and homelab changes.
+5. Phase 2: fallback by BPM and key.
+
 ## Sources
 - [VDJScript verb list](https://virtualdj.com/manuals/virtualdj/appendix/vdjscriptverbs.html)
 - [Network Control plugin](https://virtualdj.com/wiki/NetworkControlPlugin.html)
