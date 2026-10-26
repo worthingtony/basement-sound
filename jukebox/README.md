@@ -134,6 +134,8 @@ mains limiter (`Limiter1`) is Off in preset #37 (see Design). No DriveRack chang
 | Turns | **First name on first pick.** Phones remember it (cookie); the kiosk asks every time. Round-robin across names. |
 | Where it runs | **An HA app on the Pi 5** (172.16.0.138). Nothing of ours runs on the MacBook - it only runs VirtualDJ. |
 | Who reaches it | **Internal only, no public URL.** Guests join the guest Wi-Fi. A separate LXC for the request page is a later option, not v1. |
+| Engine | **VirtualDJ (option A), not Music Assistant** - keep beatmatched Automix; all browser-steering hidden in one "add exact song" function. Every route into VirtualDJ checked 2026-10-25 shares the select-then-act model: Network Control, VirtualDJ Remote (skins run VDJScript), DJCEL's VirtualDJ-API-Python and VirtualDJ-MCP-Server (both thin wrappers over Network Control, GPL-3.0, must run on the MacBook). |
+| Remote protocol | **Tony is OK reverse-engineering the VirtualDJ Remote phone app** - a time-boxed side quest, not on the build's critical path. See below. |
 
 ### Shape - one HA app, three faces
 ```
@@ -217,6 +219,24 @@ favorite** (`Folders/order` lists favorites in order; the playlist is last as of
 The same move gets the browser back after anyone has clicked around.
 
 (During the walk test the music was stopped - Tony had paused it; not caused by the probe.)
+
+### Side quest - the VirtualDJ Remote protocol
+*Goal: find out whether the phone app's connection can add a song by path, which Network Control can't.*
+
+Seen 2026-10-25 (`lsof` on VirtualDJ, read-only): the only TCP listener is Network Control's `*:8080`.
+UDP: `5353` (mDNS, likely how the Remote finds VirtualDJ), many sockets on `20808` (Ableton Link's
+port - the Ableton Link plugin is installed), and ephemeral ports on the Wi-Fi (`172.16.0.70`) and
+IoT (`192.168.21.73`) interfaces. **No Remote listener today** - it probably opens only once a Remote
+is paired, or the Remote connects through VirtualDJ's servers ("accept list"). Unknown until tried.
+
+Recon, in order, stopping at the first dead end:
+1. Tony installs VirtualDJ Remote on a phone and pairs it (cost and licence unverified).
+2. Read-only: `lsof` again - which new port, TCP or UDP, LAN or internet?
+3. Tony runs a short `sudo tcpdump` on that port while pressing browser and add buttons on the phone.
+4. If the payload is readable and shows VDJScript-like commands -> try the add-by-path forms. If it's
+   encrypted or relayed through VirtualDJ's servers -> stop; option A stands.
+
+My expectation: the Remote sends the same VDJScript, so no new capability - but cheap to check.
 
 ### Already installed that overlaps (checked 2026-10-25)
 | What | Version | Overlap |
