@@ -52,6 +52,7 @@ Tony's basement DJ system (separate from the upstairs home theater). Goal: sound
 - `cal/8111561_90deg.txt` - UMIK-2 90° calibration file (REW reads it from here - don't move it).
 - `notes/asr-nightclub-thread.md` - takeaways from the ASR "nightclub speakers" thread, mapped to this system (forum opinion, unverified).
 - `scripts/scrub-history.sh` - one-off history rewrite that purged the password and MAC values before going public (#3). Header says how to run it.
+- `jukebox/` - hands-off guest jukebox on VirtualDJ Pro (MacBook), in progress. `README.md` holds the goal, design, setup and status - read it first; `vdj_probe.py` tests VirtualDJ's Network Control plugin before any service code is written.
 
 ## DriveRack VENU360 control protocol
 Unit: 172.16.0.230, firmware 2.0.5.0, QNX-based.
