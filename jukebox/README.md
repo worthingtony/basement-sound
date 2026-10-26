@@ -174,19 +174,35 @@ Everything goes through Network Control's HTTP API. But **no VDJScript verb adds
 Automix**: `automix_add_next`, `playlist_add` and `sidelist_add` add only the browser's selection.
 Tested 2026-10-25: `automix_add_next "<file path>"` answered **HTTP 404 and added nothing**. Only
 `load "path"` takes a path, and it loads straight onto a deck (the app would have to own the mixing -
-Plan B, not wanted). So selection is made exact instead of fuzzy:
-- **Files on disk:** `browser_gotofolder "<the song's folder>"`, `browser_window 'songs'`, step with
-  `browser_scroll` until `get_browsed_filepath` equals the catalogue path, then `automix_add_next`.
-- **Streams:** `search "<artist> <title>"`, `browser_window 'songs'`, step until
-  `get_browsed_filepath` equals the catalogue's `netsearch://` id, then `automix_add_next`.
-- **Always:** read the Automix list back; no exact match -> not added, the pick goes back to the guest.
-  One add at a time.
+Plan B, not wanted). **`browser_gotofolder "<path>"` doesn't work through the plugin either**: 404
+and no move, for a real folder, the playlist's `.vdjfolder` file and the `mylists:/` form, with
+single or double quotes; with no argument it answers `false` (2026-10-25).
+
+So selection is by **search, then exact match** - for streams and files alike:
+`search "<artist> <title>"`, `browser_window 'songs'`, `browser_scroll 'top'`, step with
+`browser_scroll +1` until `get_browsed_filepath` equals the catalogue entry's path (`netsearch://…`
+id or file path), then `automix_add_next`, then read the Automix list back. No exact match -> not
+added, the pick goes back to the guest. One add at a time.
 
 Someone clicking around VirtualDJ mid-add can still make an add fail - but not add the wrong song.
 
-### Catalogue
-The app can't read `database.xml` (it's on the MacBook), so it reads the curated playlist through
-Network Control (`browser_gotofolder` to it, then step and read). **Not yet probed** - next.
+### Catalogue - probed 2026-10-25
+With VirtualDJ's browser on the `ZZZ CLAUDE test` playlist (Tony opened it), `browser_window 'songs'`,
+`browser_scroll 'top'` and stepping `+1` read all 3 songs, matching the playlist file
+(`MyLists/ZZZ CLAUDE test.vdjfolder`) exactly:
+
+| Path | Song | BPM | Key |
+|---|---|---|---|
+| `netsearch://ap6765480962` | Mr. V - Jus Dance (Remix) [Mixed] | 128.0 | Cm |
+| `netsearch://ap6765480964` | Duice - The Pawee | 128.0 | G |
+| `netsearch://ap6765480965` | Jonathan - Savage (Mixed) | 128.0 | A |
+
+Properties: `bpm`, `key`, `length` (`03:21` form) work; `songlength` and `duration` don't. Nothing
+was added (Automix count 4 before and after).
+
+**Catch:** since the app can't open a folder, it can only read the catalogue while the browser is
+already showing the playlist. So the catalogue is read **at party start**: Tony opens the playlist in
+VirtualDJ and presses "load catalogue" on the admin face; the app keeps it. Adding then uses search.
 
 ### Already installed that overlaps (checked 2026-10-25)
 | What | Version | Overlap |
@@ -208,7 +224,7 @@ Network Control (`browser_gotofolder` to it, then step and read). **Not yet prob
 - DHCP reservation for the MacBook so the app finds VirtualDJ.
 
 ### Build order
-0. Probe: list the curated playlist through Network Control; exact-select by folder and by stream id.
+0. ~~Probe: list the playlist~~ done 2026-10-25 (above). Still to prove: exact-match add of a search hit that isn't the top result.
 1. App skeleton: VirtualDJ client, catalogue, exact add - run from HA against VirtualDJ.
 2. Queue + top-up loop + fallback runway; a night with no guests.
 3. Admin face: ingress page + MQTT entities + health alert.
