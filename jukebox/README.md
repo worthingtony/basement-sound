@@ -26,7 +26,7 @@ GeniusDJ, LiveFeedback and the 2026 AIPrompt folder suggest songs but never queu
 - **VirtualDJ Automix does all playing and mixing.** The service keeps its list a few songs
   ahead plus a fallback runway, so if the service dies the music plays on for a while
   (superseded the original "fallback playlist on repeat" - see Service plan).
-- **A small service - an HA app, not on the MacBook (see Service plan)** - keeps the guest queue
+- **A small service - an HA app, not on the MacBook, internal only (see Service plan)** - keeps the guest queue
   and slots each pick in with `automix_add_next`. It talks to VirtualDJ through the
   **Network Control** plugin (Pro, VirtualDJ 2023+): HTTP `/query` and `/execute` running
   VDJScript, default port 8080, optional bearer password. (VirtualDJ's library on the MacBook is
@@ -124,72 +124,97 @@ Songs arrive at different loudness, and nobody will be riding the gain. Read fro
 Later layers, if autogain isn't enough: a VirtualDJ master limiter, then the DriveRack - the
 mains limiter (`Limiter1`) is Off in preset #37 (see Design). No DriveRack change without Tony's OK.
 
-## Service plan (draft 2026-10-25 - for Tony to agree)
+## Service plan (agreed 2026-10-25)
 
 ### Decided (Tony, 2026-10-25)
 | Question | Answer |
 |---|---|
 | Queue | **The service tops up Automix.** Remove-played stays on; the service keeps Automix 2-3 songs ahead (next guest pick by turn, else a fallback pick) plus ~10 fallback songs at the end as runway, so if the service dies the music plays on for ~40 min. |
-| Song pool | **One curated VirtualDJ playlist, streams allowed.** 383 of the 442 library entries are streams (`netsearch://`), so a night needs the internet and the subscription up. |
+| Song pool | **One curated VirtualDJ playlist, streams allowed.** 383 of the 442 library entries are streams (`netsearch://`), so a night needs the internet and the subscription up (Offline Cache would remove that - see Improvements). |
 | Turns | **First name on first pick.** Phones remember it (cookie); the kiosk asks every time. Round-robin across names. |
-| Phones | **Mobile data, not Wi-Fi: a public URL on worthingtony.com**, QR on the TV. Infra documented in a homelab folder. |
+| Where it runs | **An HA app on the Pi 5** (172.16.0.138). Nothing of ours runs on the MacBook - it only runs VirtualDJ. |
+| Who reaches it | **Internal only, no public URL.** Guests join the guest Wi-Fi. A separate LXC for the request page is a later option, not v1. |
 
-### Where it runs - a Home Assistant app (Tony, 2026-10-25)
-**Nothing of ours runs on the MacBook** - it only runs VirtualDJ. The service is an HA app (the
-add-on type, renamed Apps in HA 2026.2) on the Pi 5 (172.16.0.138), so it can later grow into
-Music Assistant work and gets an HA dashboard panel.
+### Shape - one HA app, three faces
+```
+Tony ---------- HA sidebar (ingress) + MQTT entities --> admin face   \
+kiosk iPad (house LAN) --------------------------------> request face  > jukebox HA app (Pi 5)
+guest phones (guest Wi-Fi, VLAN 1922) -- one rule ----> request face  |
+TV (house LAN) ----------------------------------------> /tv           /
+                                                              | LAN, Bearer password
+                                                              v
+                                          VirtualDJ Network Control (MacBook, :8080)
+```
+| Face | Who | Reached through |
+|---|---|---|
+| **Admin** | Tony | HA ingress (behind HA login), plus entities on his HA dashboard via MQTT discovery (Mosquitto is already installed): party on/off, now playing, queue length, skip, block a name, "VirtualDJ reachable" |
+| **Request** | kiosk iPad + guests' phones | The app's own port, **not HA**. The same page for both: the iPad shows it locked with Guided Access and asks a name each time; phones reach it on the guest Wi-Fi from a QR code and remember the name |
+| **TV** | the TV | Same port, `/tv`: now playing, up next with names, two QR codes - join the guest Wi-Fi (standard Wi-Fi QR) and open the request page |
 
-```
-phone (mobile data) --https--> Cloudflare --tunnel--> cloudflared LXC (172.31.0.152)
-                                                         |  guest port only
-iPad kiosk, TV (house LAN) ----------------------------> jukebox app on HA (Pi 5)
-Tony, HA dashboard ----------------- HA ingress -------> jukebox app (admin page)
-                                                         |  LAN, Bearer password
-                                                         v
-                                   VirtualDJ Network Control (MacBook, :8080)
-```
-- **Delivered like Kitchen Scanner:** its own GitHub app repository added to the HA app store, so
-  it gets update notices and one-click upgrades - not a `local_` app copied by hand.
-- **Two doors:** the admin page (party on/off, party code, queue, skip, block a guest) only through
-  HA ingress, so only HA users see it; the guest/kiosk/TV pages on a separate port, the only thing
-  the tunnel reaches.
-- **Catalogue:** the app can't read `database.xml` (it's on the MacBook), so it reads the curated
-  playlist through Network Control. **Not yet probed** - next probe.
-- **The VirtualDJ password** moves into the app's options (a new Copy on `virtualdj-claude`'s notes
-  line - or its own `virtualdj-jukebox` item, per the credentials convention). Plain HTTP on the LAN.
-- **MacBook asleep or away:** the guest page says the jukebox is off.
-- Same VDJScript steps as proven: `search`, `browser_window 'songs'`, check `get_browsed_filepath`,
-  `automix_add_next`, read back.
+- **Guests never touch HA, not even on the kiosk.** HA has no per-entity permissions: a non-admin
+  login still sees and controls everything (locks, cameras, Z-Wave). An iPad logged into HA in a
+  party room is a remote for the house.
+- **The app gets no HA or Supervisor API access** (`homeassistant_api` and `hassio_api` off). It
+  talks to HA only by publishing MQTT. A bug in the request page then reaches the app's own
+  container, not HA.
+- **Request page closed outside party mode** - it answers only a "jukebox is off" page.
+- **Delivered like Kitchen Scanner:** its own GitHub app repository in the HA app store, so it gets
+  update notices - not a `local_` app copied by hand.
+- **The VirtualDJ password** goes in the app's options (a new Copy on `virtualdj-claude`'s notes
+  line, or its own `virtualdj-jukebox` item - per the credentials convention). Plain HTTP on the LAN.
+- **MacBook asleep or away:** the request page says the jukebox is off; the admin entity shows
+  VirtualDJ unreachable.
+- **Health alert:** VirtualDJ unreachable for 30 s in party mode -> a notification to Tony (an HA
+  automation on the MQTT entity).
+- **Limits:** per-name cap on queued songs, and nothing a guest types reaches VDJScript - guests pick
+  from the catalogue, and the app sends only that entry's own search terms.
+
+### Adding a song - no screen control, but the browser is in the loop
+Everything goes through Network Control's HTTP API. But **no VDJScript verb adds a given file to
+Automix**: `automix_add_next`, `playlist_add` and `sidelist_add` add only the browser's selection.
+Tested 2026-10-25: `automix_add_next "<file path>"` answered **HTTP 404 and added nothing**. Only
+`load "path"` takes a path, and it loads straight onto a deck (the app would have to own the mixing -
+Plan B, not wanted). So selection is made exact instead of fuzzy:
+- **Files on disk:** `browser_gotofolder "<the song's folder>"`, `browser_window 'songs'`, step with
+  `browser_scroll` until `get_browsed_filepath` equals the catalogue path, then `automix_add_next`.
+- **Streams:** `search "<artist> <title>"`, `browser_window 'songs'`, step until
+  `get_browsed_filepath` equals the catalogue's `netsearch://` id, then `automix_add_next`.
+- **Always:** read the Automix list back; no exact match -> not added, the pick goes back to the guest.
+  One add at a time.
+
+Someone clicking around VirtualDJ mid-add can still make an add fail - but not add the wrong song.
+
+### Catalogue
+The app can't read `database.xml` (it's on the MacBook), so it reads the curated playlist through
+Network Control (`browser_gotofolder` to it, then step and read). **Not yet probed** - next.
 
 ### Already installed that overlaps (checked 2026-10-25)
 | What | Version | Overlap |
 |---|---|---|
-| **Music Assistant** (HA app) | 2.10.7, running | Same domain (music, queues, streaming providers) but it does not drive VirtualDJ. The jukebox does not use it in v1; Tony wants MA reuse later - decide then which one owns the queue |
-| Mini Media Player (HACS card) | v1.16.12 | Could show now-playing on an HA dashboard if the app exposes a media_player later. No conflict |
+| **Music Assistant** (HA app) | 2.10.7, running | Same domain (music, queues, streaming providers) but it does not drive VirtualDJ. Not used in v1; Tony wants MA reuse later - decide then which one owns the queue |
+| Mosquitto broker (HA app) | 7.1.2, running | **Used**, not overlapping: the app publishes its entities through it |
+| Mini Media Player (HACS card) | v1.16.12 | Could show now playing on the dashboard. No conflict |
 
-### Public exposure - the part that needs care
-- **Only the guest port goes through the tunnel** - never HA itself, never Network Control.
-  `home.worthingtony.com` (Nabu Casa) is separate and unchanged.
-- **Party code.** The QR carries a code that changes each party; picks without it are refused, and
-  outside party mode the guest port answers nothing but a closed page.
-- **Limits:** per-name cap on queued songs, a Cloudflare rate-limit rule on the pick endpoint
-  (Free plan allows it - homelab `network/tunnel.md`), and nothing guest-typed reaches VDJScript
-  except artist and title from our own catalogue.
-- **No Cloudflare Access** - guests have no login. The party code is the boundary.
+### Improvements not yet decided
+- **MacBook on Ethernet** and **Offline Cache** for the curated and fallback songs, so a Wi-Fi or
+  internet blip isn't silence. (The MacBook also has an interface on the IoT VLAN 1921 as its
+  default route - worth tidying.)
+- **DriveRack mains limiter** (`Limiter1`, Off in preset #37) for unattended nights - Tony's call.
+- **Request page in its own LXC** later, so guest Wi-Fi never reaches the Pi.
 
-### Infra (homelab, folder `jukebox/`, separate PR)
-- Tunnel hostname **`studio841.worthingtony.com`** -> the app's guest port on the Pi.
-- Firewall: cloudflared LXC (VLAN 1731) -> Pi guest port only. App -> MacBook :8080 (check
-  whether both are on VLAN 1 - then no rule is needed).
-- The MacBook needs a fixed address (DHCP reservation) so the app can find VirtualDJ.
+### Infra (homelab `jukebox/`)
+- Firewall: **guest VLAN 1922 -> Pi, request port only.** App -> MacBook :8080 is VLAN 1 to VLAN 1:
+  no rule (verified: 401 from HA in 0.09 s).
+- DHCP reservation for the MacBook so the app finds VirtualDJ.
 
 ### Build order
-0. Probe: list the curated playlist's songs through Network Control.
-1. Catalogue reader + `add` by file path, proven against VirtualDJ from off the MacBook.
-2. Queue + top-up loop + fallback runway; run a night with no guests.
-3. Kiosk and TV pages on the LAN.
-4. Party code, limits, then the tunnel hostname and homelab changes.
-5. Phase 2: fallback by BPM and key.
+0. Probe: list the curated playlist through Network Control; exact-select by folder and by stream id.
+1. App skeleton: VirtualDJ client, catalogue, exact add - run from HA against VirtualDJ.
+2. Queue + top-up loop + fallback runway; a night with no guests.
+3. Admin face: ingress page + MQTT entities + health alert.
+4. Request and TV faces on the house LAN (kiosk first).
+5. Guest Wi-Fi rule; phones.
+6. Phase 2: fallback by BPM and key.
 
 ## Sources
 - [VDJScript verb list](https://virtualdj.com/manuals/virtualdj/appendix/vdjscriptverbs.html)
