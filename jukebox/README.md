@@ -383,6 +383,33 @@ wiki), so registering a script never runs it.
 | Mosquitto broker (HA app) | 7.1.2, running | **Used**, not overlapping: the app publishes its entities through it |
 | Mini Media Player (HACS card) | v1.16.12 | Could show now playing on the dashboard. No conflict |
 
+### Where it stands, end of 2026-10-26 (pick up here)
+- **App:** studio841-jukebox **0.2.2** on the Pi.
+  - It's connected to VirtualDJ as a Remote.
+  - The HA entities exist over MQTT (`*.studio_841_jukebox_*`).
+  - Autopilot is on, with `party` (102 songs).
+  - Tony stopped Automix for the night.
+- **Autopilot test:**
+  - About 3 hours, roughly 30 top-ups, nearly all green fits.
+  - Repeats came back after two restarts; fixed in 0.2.1 (VirtualDJ's `lastplay`).
+  - Two kinds of hiccup:
+    - hourly Wi-Fi blips on the Mac at about :08:31. The jukebox rides these out. At 19:08 with Ethernet off there was no loss, but a 479 ms spike;
+    - VirtualDJ stalls, with ping times up but no loss. Since 0.2.1 the app recovers in about 25 s.
+- **Automix:** two decks now (Tony), and remove-after-play stays.
+- **MQTT isolation failed:** the Mosquitto app makes every login a superuser, so the access list
+  has no effect. The `jukebox` login reaches every topic, Ring's included. Details are in homelab
+  PR #97, `jukebox/APPLY.md` Outcome. **Decide the alternative before any guest page.** The lead
+  option is a request page in its own LXC with no broker login.
+- **Freeze** (agreed with the coordinator): no live steps or app releases until homelab #97 merges.
+- **Tony's open items:**
+  - The isolation choice.
+  - Whether to turn Mosquitto's (inert) Customize back off.
+  - Network Control vs. the IoT VLAN.
+  - Confirm the `mosquitto-jukebox` 1Password item is saved.
+  - Delete the "ZZZ CLAUDE test" playlist.
+  - Say whether two decks fixed the volume jumps.
+- **Next build, after #97:** the guest step, shaped by the research below, once isolation is decided.
+
 ### Ideas from other jukeboxes and request apps (research, 2026-10-26)
 A web survey: TouchTunes, AMI, Rockbot, Soundtrack, Festify, Spotify Jam, SharePlay, Jukestar,
 WrzDJ, DJ Intelligence, VirtualDJ's Ask the DJ and karaoke, and DJCEL's MCP server. It was read
